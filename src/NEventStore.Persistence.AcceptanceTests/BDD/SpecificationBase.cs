@@ -1,10 +1,16 @@
 ﻿namespace NEventStore.Persistence.AcceptanceTests.BDD
 {
+    using System;
+    using NEventStore.Dispatcher;
     using Xunit;
-
-    [RunWith(typeof (SpecificationBaseRunner))]
-    public abstract class SpecificationBase
+    
+    public abstract class SpecificationBase : IDisposable
     {
+        public SpecificationBase()
+        {
+            
+        }
+
         protected virtual void Because()
         {}
 
@@ -23,6 +29,11 @@
         {
             Context();
             Because();
+        }
+
+        public virtual void Dispose()
+        {
+            
         }
     }
 }

@@ -528,7 +528,8 @@ namespace NEventStore
         }
     }
 
-    public abstract class on_the_event_stream : SpecificationBase, IUseFixture<FakeTimeFixture>
+
+    public abstract class on_the_event_stream : SpecificationBase, IClassFixture<FakeTimeFixture>
     {
         protected const int DefaultStreamRevision = 1;
         protected const int DefaultCommitSequence = 1;
