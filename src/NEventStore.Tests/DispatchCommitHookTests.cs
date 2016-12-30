@@ -12,7 +12,7 @@ namespace NEventStore
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
+    using XunitShould;
 
     public class when_a_commit_has_been_persisted : SpecificationBase
     {

@@ -13,7 +13,7 @@ namespace NEventStore.Persistence.AcceptanceTests
     using NEventStore.Diagnostics;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
+    using XunitShould;
 
     public class when_a_commit_header_has_a_name_that_contains_a_period : PersistenceEngineConcern
     {
@@ -43,6 +43,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _persisted.Headers.Keys.ShouldContain("key.1");
         }
+
+        public when_a_commit_header_has_a_name_that_contains_a_period(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_a_commit_is_successfully_persisted : PersistenceEngineConcern
@@ -69,25 +72,25 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_correctly_persist_the_stream_identifier()
         {
-            _persisted.StreamId.ShouldBe(_attempt.StreamId);
+            _persisted.StreamId.ShouldEqual(_attempt.StreamId);
         }
 
         [Fact]
         public void should_correctly_persist_the_stream_stream_revision()
         {
-            _persisted.StreamRevision.ShouldBe(_attempt.StreamRevision);
+            _persisted.StreamRevision.ShouldEqual(_attempt.StreamRevision);
         }
 
         [Fact]
         public void should_correctly_persist_the_commit_identifier()
         {
-            _persisted.CommitId.ShouldBe(_attempt.CommitId);
+            _persisted.CommitId.ShouldEqual(_attempt.CommitId);
         }
 
         [Fact]
         public void should_correctly_persist_the_commit_sequence()
         {
-            _persisted.CommitSequence.ShouldBe(_attempt.CommitSequence);
+            _persisted.CommitSequence.ShouldEqual(_attempt.CommitSequence);
         }
 
         // persistence engines have varying levels of precision with respect to time.
@@ -95,22 +98,22 @@ namespace NEventStore.Persistence.AcceptanceTests
         public void should_correctly_persist_the_commit_stamp()
         {
             var difference = _persisted.CommitStamp.Subtract(_now);
-            difference.Days.ShouldBe(0);
-            difference.Hours.ShouldBe(0);
-            difference.Minutes.ShouldBe(0);
+            difference.Days.ShouldEqual(0);
+            difference.Hours.ShouldEqual(0);
+            difference.Minutes.ShouldEqual(0);
             difference.ShouldBeLessThanOrEqualTo(TimeSpan.FromSeconds(1));
         }
 
         [Fact]
         public void should_correctly_persist_the_headers()
         {
-            _persisted.Headers.Count.ShouldBe(_attempt.Headers.Count);
+            _persisted.Headers.Count.ShouldEqual(_attempt.Headers.Count);
         }
 
         [Fact]
         public void should_correctly_persist_the_events()
         {
-            _persisted.Events.Count.ShouldBe(_attempt.Events.Count);
+            _persisted.Events.Count.ShouldEqual(_attempt.Events.Count);
         }
 
         [Fact]
@@ -124,6 +127,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             Persistence.GetStreamsToSnapshot(1).FirstOrDefault(x => x.StreamId == _streamId).ShouldNotBeNull();
         }
+
+        public when_a_commit_is_successfully_persisted(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_reading_from_a_given_revision : PersistenceEngineConcern
@@ -152,14 +158,17 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_start_from_the_commit_which_contains_the_min_stream_revision_specified()
         {
-            _committed.First().CommitId.ShouldBe(_oldest2.CommitId); // contains revision 3
+            _committed.First().CommitId.ShouldEqual(_oldest2.CommitId); // contains revision 3
         }
 
         [Fact]
         public void should_read_up_to_the_commit_which_contains_the_max_stream_revision_specified()
         {
-            _committed.Last().CommitId.ShouldBe(_oldest3.CommitId); // contains revision 5
+            _committed.Last().CommitId.ShouldEqual(_oldest3.CommitId); // contains revision 5
         }
+
+        public when_reading_from_a_given_revision(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_reading_from_a_given_revision_to_commit_revision : PersistenceEngineConcern
@@ -188,14 +197,17 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_start_from_the_commit_which_contains_the_min_stream_revision_specified()
         {
-            _committed.First().CommitId.ShouldBe(_oldest2.CommitId); // contains revision 3
+            _committed.First().CommitId.ShouldEqual(_oldest2.CommitId); // contains revision 3
         }
 
         [Fact]
         public void should_read_up_to_the_commit_which_contains_the_max_stream_revision_specified()
         {
-            _committed.Last().CommitId.ShouldBe(_oldest3.CommitId); // contains revision 6
+            _committed.Last().CommitId.ShouldEqual(_oldest3.CommitId); // contains revision 6
         }
+
+        public when_reading_from_a_given_revision_to_commit_revision(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_committing_a_stream_with_the_same_revision : PersistenceEngineConcern
@@ -219,6 +231,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _thrown.ShouldBeInstanceOf<ConcurrencyException>();
         }
+
+        public when_committing_a_stream_with_the_same_revision(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     // This test ensure the uniqueness of BucketId+StreamId+CommitSequence 
@@ -259,6 +274,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _thrown.ShouldBeInstanceOf<ConcurrencyException>();
         }
+
+        public when_committing_a_stream_with_the_same_sequence(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     //TODO:This test looks exactly like the one above. What are we trying to prove?
@@ -285,6 +303,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _thrown.ShouldBeInstanceOf<ConcurrencyException>();
         }
+
+        public when_attempting_to_overwrite_a_committed_sequence(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_attempting_to_persist_a_commit_twice : PersistenceEngineConcern
@@ -316,6 +337,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _thrown.ShouldBeInstanceOf<DuplicateCommitException>();
         }
+
+        public when_attempting_to_persist_a_commit_twice(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_a_commit_has_been_marked_as_dispatched : PersistenceEngineConcern
@@ -337,6 +361,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             Persistence.GetUndispatchedCommits().FirstOrDefault(x => x.CommitId == _commit.CommitId).ShouldBeNull();
         }
+
+        public when_a_commit_has_been_marked_as_dispatched(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_committing_more_events_than_the_configured_page_size : PersistenceEngineConcern
@@ -359,7 +386,7 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_load_the_same_number_of_commits_which_have_been_persisted()
         {
-            _loaded.Length.ShouldBe(_committed.Length);
+            _loaded.Length.ShouldEqual(_committed.Length);
         }
 
         [Fact]
@@ -369,6 +396,9 @@ namespace NEventStore.Persistence.AcceptanceTests
                 .All(commit => _loaded.SingleOrDefault(loaded => loaded.CommitId == commit.CommitId) != null)
                 .ShouldBeTrue();
         }
+
+        public when_committing_more_events_than_the_configured_page_size(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_saving_a_snapshot : PersistenceEngineConcern
@@ -400,6 +430,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             Persistence.GetSnapshot(_streamId, _snapshot.StreamRevision).ShouldNotBeNull();
         }
+
+        public when_saving_a_snapshot(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_retrieving_a_snapshot : PersistenceEngineConcern
@@ -429,20 +462,23 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_load_the_most_recent_prior_snapshot()
         {
-            _snapshot.StreamRevision.ShouldBe(_correct.StreamRevision);
+            _snapshot.StreamRevision.ShouldEqual(_correct.StreamRevision);
         }
 
         [Fact]
         public void should_have_the_correct_snapshot_payload()
         {
-            _snapshot.Payload.ShouldBe(_correct.Payload);
+            _snapshot.Payload.ShouldEqual(_correct.Payload);
         }
 
         [Fact]
         public void should_have_the_correct_stream_id()
         {
-            _snapshot.StreamId.ShouldBe(_correct.StreamId);
+            _snapshot.StreamId.ShouldEqual(_correct.StreamId);
         }
+
+        public when_retrieving_a_snapshot(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_a_snapshot_has_been_added_to_the_most_recent_commit_of_a_stream : PersistenceEngineConcern
@@ -470,6 +506,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             Persistence.GetStreamsToSnapshot(1).Any(x => x.StreamId == _streamId).ShouldBeFalse();
         }
+
+        public when_a_snapshot_has_been_added_to_the_most_recent_commit_of_a_stream(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_adding_a_commit_after_a_snapshot : PersistenceEngineConcern
@@ -505,6 +544,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             Persistence.GetStreamsToSnapshot(OverThreshold).Any(x => x.StreamId == _streamId).ShouldBeFalse();
         }
+
+        public when_adding_a_commit_after_a_snapshot(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_reading_all_commits_from_a_particular_point_in_time : PersistenceEngineConcern
@@ -537,8 +579,11 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_return_all_commits_on_or_after_the_point_in_time_specified()
         {
-            _committed.Length.ShouldBe(4);
+            _committed.Length.ShouldEqual(4);
         }
+
+        public when_reading_all_commits_from_a_particular_point_in_time(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_paging_over_all_commits_from_a_particular_point_in_time : PersistenceEngineConcern
@@ -565,7 +610,7 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_load_the_same_number_of_commits_which_have_been_persisted()
         {
-            _loaded.Length.ShouldBe(_committed.Length);
+            _loaded.Length.ShouldEqual(_committed.Length);
         }
 
         [Fact]
@@ -575,6 +620,9 @@ namespace NEventStore.Persistence.AcceptanceTests
                 .All(commit => _loaded.SingleOrDefault(loaded => loaded.CommitId == commit.CommitId) != null)
                 .ShouldBeTrue();
         }
+
+        public when_paging_over_all_commits_from_a_particular_point_in_time(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_paging_over_all_commits_from_a_particular_checkpoint : PersistenceEngineConcern
@@ -597,7 +645,7 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_load_the_same_number_of_commits_which_have_been_persisted_starting_from_the_checkpoint()
         {
-            _loaded.Count.ShouldBe(_committed.Count - checkPoint);
+            _loaded.Count.ShouldEqual(_committed.Count - checkPoint);
         }
 
         [Fact]
@@ -606,6 +654,8 @@ namespace NEventStore.Persistence.AcceptanceTests
             _committed.Skip(checkPoint).All(x => _loaded.Contains(x)).ShouldBeTrue(); // all commits should be found in loaded collection
         }
 
+        public when_paging_over_all_commits_from_a_particular_checkpoint(PersistenceEngineFixture data) : base(data)
+        {}
     }
     public class when_paging_over_all_commits_of_a_bucket_from_a_particular_checkpoint : PersistenceEngineConcern
     {
@@ -630,7 +680,7 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_load_the_same_number_of_commits_which_have_been_persisted_starting_from_the_checkpoint()
         {
-            _loaded.Count.ShouldBe(_committedOnBucket1.Count - checkPoint);
+            _loaded.Count.ShouldEqual(_committedOnBucket1.Count - checkPoint);
         }
 
         [Fact]
@@ -644,6 +694,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _committedOnBucket2.All(x => !_loaded.Contains(x)).ShouldBeTrue(); 
         }
+
+        public when_paging_over_all_commits_of_a_bucket_from_a_particular_checkpoint(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_reading_all_commits_from_the_year_1_AD : PersistenceEngineConcern
@@ -661,6 +714,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _thrown.ShouldBeNull();
         }
+
+        public when_reading_all_commits_from_the_year_1_AD(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_purging_all_commits : PersistenceEngineConcern
@@ -678,20 +734,23 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_not_find_any_commits_stored()
         {
-            Persistence.GetFrom(DateTime.MinValue).Count().ShouldBe(0);
+            Persistence.GetFrom(DateTime.MinValue).Count().ShouldEqual(0);
         }
 
         [Fact]
         public void should_not_find_any_streams_to_snapshot()
         {
-            Persistence.GetStreamsToSnapshot(0).Count().ShouldBe(0);
+            Persistence.GetStreamsToSnapshot(0).Count().ShouldEqual(0);
         }
 
         [Fact]
         public void should_not_find_any_undispatched_commits()
         {
-            Persistence.GetUndispatchedCommits().Count().ShouldBe(0);
+            Persistence.GetUndispatchedCommits().Count().ShouldEqual(0);
         }
+
+        public when_purging_all_commits(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_invoking_after_disposal : PersistenceEngineConcern
@@ -713,6 +772,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _thrown.ShouldBeInstanceOf<ObjectDisposedException>();
         }
+
+        public when_invoking_after_disposal(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_committing_a_stream_with_the_same_id_as_a_stream_same_bucket : PersistenceEngineConcern
@@ -743,6 +805,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _thrown.ShouldBeInstanceOf<ConcurrencyException>();
         }
+
+        public when_committing_a_stream_with_the_same_id_as_a_stream_same_bucket(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_committing_a_stream_with_the_same_id_as_a_stream_in_another_bucket : PersistenceEngineConcern
@@ -779,7 +844,7 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             ICommit[] stream = Persistence.GetFrom(_bucketBId, _streamId, 0, int.MaxValue).ToArray();
             stream.ShouldNotBeNull();
-            stream.Count().ShouldBe(1);
+            stream.Count().ShouldEqual(1);
         }
 
         [Fact]
@@ -787,9 +852,12 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             ICommit[] stream = Persistence.GetFrom(_bucketAId, _streamId, 0, int.MaxValue).ToArray();
             stream.ShouldNotBeNull();
-            stream.Count().ShouldBe(1);
-            stream.First().CommitStamp.ShouldBe(_attemptACommitStamp);
+            stream.Count().ShouldEqual(1);
+            stream.First().CommitStamp.ShouldEqual(_attemptACommitStamp);
         }
+
+        public when_committing_a_stream_with_the_same_id_as_a_stream_in_another_bucket(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_saving_a_snapshot_for_a_stream_with_the_same_id_as_a_stream_in_another_bucket : PersistenceEngineConcern
@@ -819,6 +887,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             Persistence.GetSnapshot(_bucketAId, _streamId, _snapshot.StreamRevision).ShouldBeNull();
         }
+
+        public when_saving_a_snapshot_for_a_stream_with_the_same_id_as_a_stream_in_another_bucket(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_reading_all_commits_from_a_particular_point_in_time_and_there_are_streams_in_multiple_buckets : PersistenceEngineConcern
@@ -856,6 +927,9 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _returnedCommits.Any(c => c.CommitId.Equals(_commitToBucketB.CommitId)).ShouldBeFalse();
         }
+
+        public when_reading_all_commits_from_a_particular_point_in_time_and_there_are_streams_in_multiple_buckets(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_getting_all_commits_since_checkpoint_and_there_are_streams_in_multiple_buckets : PersistenceEngineConcern
@@ -893,6 +967,9 @@ namespace NEventStore.Persistence.AcceptanceTests
                 checkpoint = Persistence.GetCheckpoint(commit.CheckpointToken);
             }
         }
+
+        public when_getting_all_commits_since_checkpoint_and_there_are_streams_in_multiple_buckets(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_purging_all_commits_and_there_are_streams_in_multiple_buckets : PersistenceEngineConcern
@@ -916,32 +993,35 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void should_purge_all_commits_stored_in_bucket_a()
         {
-            Persistence.GetFrom(_bucketAId, DateTime.MinValue).Count().ShouldBe(0);
+            Persistence.GetFrom(_bucketAId, DateTime.MinValue).Count().ShouldEqual(0);
         }
 
         [Fact]
         public void should_purge_all_commits_stored_in_bucket_b()
         {
-            Persistence.GetFrom(_bucketBId, DateTime.MinValue).Count().ShouldBe(0);
+            Persistence.GetFrom(_bucketBId, DateTime.MinValue).Count().ShouldEqual(0);
         }
 
         [Fact]
         public void should_purge_all_streams_to_snapshot_in_bucket_a()
         {
-            Persistence.GetStreamsToSnapshot(_bucketAId, 0).Count().ShouldBe(0);
+            Persistence.GetStreamsToSnapshot(_bucketAId, 0).Count().ShouldEqual(0);
         }
 
         [Fact]
         public void should_purge_all_streams_to_snapshot_in_bucket_b()
         {
-            Persistence.GetStreamsToSnapshot(_bucketBId, 0).Count().ShouldBe(0);
+            Persistence.GetStreamsToSnapshot(_bucketBId, 0).Count().ShouldEqual(0);
         }
 
         [Fact]
         public void should_purge_all_undispatched_commits()
         {
-            Persistence.GetUndispatchedCommits().Count().ShouldBe(0);
+            Persistence.GetUndispatchedCommits().Count().ShouldEqual(0);
         }
+
+        public when_purging_all_commits_and_there_are_streams_in_multiple_buckets(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     public class when_gettingfromcheckpoint_amount_of_commits_exceeds_pagesize : PersistenceEngineConcern
@@ -969,8 +1049,11 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void Should_have_expected_number_of_commits()
         {
-            _commits.Length.ShouldBe(_moreThanPageSize);
+            _commits.Length.ShouldEqual(_moreThanPageSize);
         }
+
+        public when_gettingfromcheckpoint_amount_of_commits_exceeds_pagesize(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
     /*public class TransactionConcern : PersistenceEngineConcern
@@ -1008,7 +1091,7 @@ namespace NEventStore.Persistence.AcceptanceTests
         [Fact]
         public void Should_have_expected_number_of_commits()
         {
-            _commits.Length.ShouldBe(Loop * StreamsPerTransaction);
+            _commits.Length.ShouldEqual(Loop * StreamsPerTransaction);
         }
 
         [Fact]
@@ -1039,7 +1122,7 @@ namespace NEventStore.Persistence.AcceptanceTests
             }
             ICheckpoint checkpoint = Persistence.GetCheckpoint();
             ICommit[] commits = Persistence.GetFrom(checkpoint.Value).ToArray();
-            commits.Length.ShouldBe(loop);
+            commits.Length.ShouldEqual(loop);
         }
 
         [Fact]
@@ -1069,7 +1152,7 @@ namespace NEventStore.Persistence.AcceptanceTests
             }
             ICheckpoint checkpoint = Persistence.GetCheckpoint();
             ICommit[] commits = Persistence.GetFrom(checkpoint.Value).ToArray();
-            commits.Length.ShouldBe(0);
+            commits.Length.ShouldEqual(0);
         }
 
         [Fact]
@@ -1099,7 +1182,7 @@ namespace NEventStore.Persistence.AcceptanceTests
             }
             ICheckpoint checkpoint = Persistence.GetCheckpoint();
             ICommit[] commits = Persistence.GetFrom(checkpoint.Value).ToArray();
-            commits.Length.ShouldBe(0);
+            commits.Length.ShouldEqual(0);
         }
     }*/
 
@@ -1121,11 +1204,14 @@ namespace NEventStore.Persistence.AcceptanceTests
             Persistence.Commit(attempt);
 
             ICommit commits = Persistence.GetFrom().Single();
-            commits.Events.Single().Body.ToString().Length.ShouldBe(bodyLength);
+            commits.Events.Single().Body.ToString().Length.ShouldEqual(bodyLength);
         }
+
+        public when_a_payload_is_large(PersistenceEngineFixture data) : base(data)
+        {}
     }
 
-    public class PersistenceEngineConcern : SpecificationBase, IClassFixture<PersistenceEngineFixture>
+    public class PersistenceEngineConcern : SpecificationBase2, IClassFixture<PersistenceEngineFixture>
     {
         private PersistenceEngineFixture _fixture;
 
@@ -1144,10 +1230,12 @@ namespace NEventStore.Persistence.AcceptanceTests
             _fixture.Initialize(ConfiguredPageSizeForTesting);
         }
 
-        public void SetFixture(PersistenceEngineFixture data)
+        public PersistenceEngineConcern(PersistenceEngineFixture data)
         {
             _fixture = data;
             _fixture.Initialize(ConfiguredPageSizeForTesting);
+
+            OnStart();
         }
     }
 
