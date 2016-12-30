@@ -14,7 +14,7 @@ namespace NEventStore
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
+    using XunitShould;
 
     public class when_creating_a_new_stream : using_persistence
     {
@@ -34,19 +34,19 @@ namespace NEventStore
         [Fact]
         public void should_return_a_stream_with_the_correct_stream_identifier()
         {
-            _stream.StreamId.ShouldBe(streamId);
+            _stream.StreamId.ShouldEqual(streamId);
         }
 
         [Fact]
         public void should_return_a_stream_with_a_zero_stream_revision()
         {
-            _stream.StreamRevision.ShouldBe(0);
+            _stream.StreamRevision.ShouldEqual(0);
         }
 
         [Fact]
         public void should_return_a_stream_with_a_zero_commit_sequence()
         {
-            _stream.CommitSequence.ShouldBe(0);
+            _stream.CommitSequence.ShouldEqual(0);
         }
 
         [Fact]
@@ -91,19 +91,19 @@ namespace NEventStore
         [Fact]
         public void should_return_a_stream_with_the_correct_stream_identifier()
         {
-            _stream.StreamId.ShouldBe(streamId);
+            _stream.StreamId.ShouldEqual(streamId);
         }
 
         [Fact]
         public void should_return_a_stream_with_a_zero_stream_revision()
         {
-            _stream.StreamRevision.ShouldBe(0);
+            _stream.StreamRevision.ShouldEqual(0);
         }
 
         [Fact]
         public void should_return_a_stream_with_a_zero_commit_sequence()
         {
-            _stream.CommitSequence.ShouldBe(0);
+            _stream.CommitSequence.ShouldEqual(0);
         }
 
         [Fact]
@@ -187,7 +187,7 @@ namespace NEventStore
         [Fact]
         public void should_return_an_event_stream_containing_the_correct_stream_identifer()
         {
-            _stream.StreamId.ShouldBe(streamId);
+            _stream.StreamId.ShouldEqual(streamId);
         }
     }
 
@@ -243,37 +243,37 @@ namespace NEventStore
         [Fact]
         public void should_return_a_stream_with_the_correct_stream_identifier()
         {
-            _stream.StreamId.ShouldBe(streamId);
+            _stream.StreamId.ShouldEqual(streamId);
         }
 
         [Fact]
         public void should_return_a_stream_with_revision_of_the_stream_head()
         {
-            _stream.StreamRevision.ShouldBe(HeadStreamRevision);
+            _stream.StreamRevision.ShouldEqual(HeadStreamRevision);
         }
 
         [Fact]
         public void should_return_a_stream_with_a_commit_sequence_of_the_stream_head()
         {
-            _stream.CommitSequence.ShouldBe(HeadCommitSequence);
+            _stream.CommitSequence.ShouldEqual(HeadCommitSequence);
         }
 
         [Fact]
         public void should_return_a_stream_with_no_committed_events()
         {
-            _stream.CommittedEvents.Count.ShouldBe(0);
+            _stream.CommittedEvents.Count.ShouldEqual(0);
         }
 
         [Fact]
         public void should_return_a_stream_with_no_uncommitted_events()
         {
-            _stream.UncommittedEvents.Count.ShouldBe(0);
+            _stream.UncommittedEvents.Count.ShouldEqual(0);
         }
 
         [Fact]
         public void should_only_enumerate_the_set_of_commits_once()
         {
-            _committed.GetEnumeratorCallCount.ShouldBe(1);
+            _committed.GetEnumeratorCallCount.ShouldEqual(1);
         }
     }
 

@@ -4,7 +4,7 @@
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using System;
     using Xunit;
-    using Xunit.Should;
+    using XunitShould;
 
     public class DefaultSerializationWireupTests
     {

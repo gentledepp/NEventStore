@@ -12,7 +12,7 @@
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
+    using XunitShould;
 
     public class CreatingPollingClientTests
     {
@@ -89,7 +89,7 @@
         [Fact]
         public void should_observe_commit()
         {
-            _commitObserved.Wait(PollingInterval * 2).ShouldBe(true);
+            _commitObserved.Wait(PollingInterval * 2).ShouldEqual(true);
         }
     }
 
@@ -120,7 +120,7 @@
         [Fact]
         public void should_observe_two_commits()
         {
-            _twoCommitsObserved.Wait(PollingInterval * 2).ShouldBe(true);
+            _twoCommitsObserved.Wait(PollingInterval * 2).ShouldEqual(true);
         }
     }
 
@@ -164,13 +164,13 @@
         [Fact]
         public void should_observe_commits_on_first_observer()
         {
-            _observeCommits1Complete.Wait(PollingInterval * 10).ShouldBe(true);
+            _observeCommits1Complete.Wait(PollingInterval * 10).ShouldEqual(true);
         }
 
         [Fact]
         public void should_observe_commits_on_second_observer()
         {
-            _observeCommits2Complete.Wait(PollingInterval * 10).ShouldBe(true);
+            _observeCommits2Complete.Wait(PollingInterval * 10).ShouldEqual(true);
         }
     }
 
@@ -209,13 +209,13 @@
         [Fact]
         public void should_observe_commits_on_first_observer()
         {
-            _observeCommits1Complete.Wait(PollingInterval * 10).ShouldBe(true);
+            _observeCommits1Complete.Wait(PollingInterval * 10).ShouldEqual(true);
         }
 
         [Fact]
         public void should_observe_commits_on_second_observer()
         {
-            _observeCommits2Complete.Wait(PollingInterval * 10).ShouldBe(true);
+            _observeCommits2Complete.Wait(PollingInterval * 10).ShouldEqual(true);
         }
     }
 
@@ -253,7 +253,7 @@
         [Fact]
         public void should_observe_commit()
         {
-            _commitObserved.Wait(PollingInterval * 2).ShouldBe(true);
+            _commitObserved.Wait(PollingInterval * 2).ShouldEqual(true);
         }
     }
 
@@ -283,7 +283,7 @@
         [Fact]
         public void should_observe_commit()
         {
-            _commitObserved.Wait(PollingInterval * 2).ShouldBe(true);
+            _commitObserved.Wait(PollingInterval * 2).ShouldEqual(true);
         }
     }
     
@@ -314,8 +314,8 @@
         [Fact]
         public void should_observe_commit_from_bucket1()
         {
-            _commitObserved.Wait(PollingInterval * 2).ShouldBe(true);
-            _commitObserved.Result.BucketId.ShouldBe("bucket_1");
+            _commitObserved.Wait(PollingInterval * 2).ShouldEqual(true);
+            _commitObserved.Result.BucketId.ShouldEqual("bucket_1");
         }
     }
 }

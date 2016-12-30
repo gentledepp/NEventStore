@@ -6,7 +6,7 @@
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
+    using XunitShould;
 
     public class when_serializing_a_simple_message : SerializationConcern
     {
@@ -27,31 +27,31 @@
         [Fact]
         public void should_deserialize_a_message_which_contains_the_same_Id_as_the_serialized_message()
         {
-            _deserialized.Id.ShouldBe(_message.Id);
+            _deserialized.Id.ShouldEqual(_message.Id);
         }
 
         [Fact]
         public void should_deserialize_a_message_which_contains_the_same_Value_as_the_serialized_message()
         {
-            _deserialized.Value.ShouldBe(_message.Value);
+            _deserialized.Value.ShouldEqual(_message.Value);
         }
 
         [Fact]
         public void should_deserialize_a_message_which_contains_the_same_Created_value_as_the_serialized_message()
         {
-            _deserialized.Created.ShouldBe(_message.Created);
+            _deserialized.Created.ShouldEqual(_message.Created);
         }
 
         [Fact]
         public void should_deserialize_a_message_which_contains_the_same_Count_as_the_serialized_message()
         {
-            _deserialized.Count.ShouldBe(_message.Count);
+            _deserialized.Count.ShouldEqual(_message.Count);
         }
 
         [Fact]
         public void should_deserialize_a_message_which_contains_the_number_of_elements_as_the_serialized_message()
         {
-            _deserialized.Contents.Count.ShouldBe(_message.Contents.Count);
+            _deserialized.Contents.Count.ShouldEqual(_message.Contents.Count);
         }
 
         [Fact]
@@ -59,6 +59,9 @@
         {
             _deserialized.Contents.SequenceEqual(_message.Contents).ShouldBeTrue();
         }
+
+        public when_serializing_a_simple_message(SerializerFixture data) : base(data)
+        {}
     }
 
     public class when_serializing_a_list_of_event_messages : SerializationConcern
@@ -86,7 +89,7 @@
         [Fact]
         public void should_deserialize_the_same_number_of_event_messages_as_it_serialized()
         {
-            Messages.Count.ShouldBe(_deserialized.Count);
+            Messages.Count.ShouldEqual(_deserialized.Count);
         }
 
         [Fact]
@@ -94,6 +97,9 @@
         {
             _deserialized.Last().Body.ShouldBeInstanceOf<SimpleMessage>();
         }
+
+        public when_serializing_a_list_of_event_messages(SerializerFixture data) : base(data)
+        {}
     }
 
     public class when_serializing_a_list_of_commit_headers : SerializationConcern
@@ -122,7 +128,7 @@
         [Fact]
         public void should_deserialize_the_same_number_of_event_messages_as_it_serialized()
         {
-            _headers.Count.ShouldBe(_deserialized.Count);
+            _headers.Count.ShouldEqual(_deserialized.Count);
         }
 
         [Fact]
@@ -130,6 +136,9 @@
         {
             _deserialized.Last().Value.ShouldBeInstanceOf<SimpleMessage>();
         }
+
+        public when_serializing_a_list_of_commit_headers(SerializerFixture data) : base(data)
+        {}
     }
 
     public class when_serializing_an_untyped_payload_on_a_snapshot : SerializationConcern
@@ -154,7 +163,7 @@
         [Fact]
         public void should_correctly_deserialize_the_untyped_payload_contents()
         {
-            _deserialized.Payload.ShouldBe(_snapshot.Payload);
+            _deserialized.Payload.ShouldEqual(_snapshot.Payload);
         }
 
         [Fact]
@@ -162,9 +171,11 @@
         {
             _deserialized.Payload.ShouldBeInstanceOf(_snapshot.Payload.GetType());
         }
-    }
 
-    public class SerializationConcern : SpecificationBase, IUseFixture<SerializerFixture>
+        public when_serializing_an_untyped_payload_on_a_snapshot(SerializerFixture data) : base(data)
+        {}
+    }
+    public class SerializationConcern : SpecificationBase2, IClassFixture<SerializerFixture>
     {
         private SerializerFixture _data;
 
@@ -173,9 +184,10 @@
             get { return _data.Serializer; }
         }
 
-        public void SetFixture(SerializerFixture data)
+        public SerializationConcern(SerializerFixture data)
         {
             _data = data;
+            OnStart();
         }
     }
 
