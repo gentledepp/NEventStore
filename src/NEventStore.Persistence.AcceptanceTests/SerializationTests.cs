@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
@@ -112,29 +113,31 @@
             {"LastKey", new SimpleMessage()}
         };
 
-        private Dictionary<string, object> _deserialized;
+        private EventMessage _message;
+        private EventMessage _deserialized;
         private byte[] _serialized;
 
         protected override void Context()
         {
-            _serialized = Serializer.Serialize(_headers);
+            _message = new EventMessage() {Headers = _headers};
+            _serialized = Serializer.Serialize(_message);
         }
 
         protected override void Because()
         {
-            _deserialized = Serializer.Deserialize<Dictionary<string, object>>(_serialized);
+            _deserialized = Serializer.Deserialize<EventMessage>(_serialized);
         }
 
         [Fact]
         public void should_deserialize_the_same_number_of_event_messages_as_it_serialized()
         {
-            _headers.Count.ShouldEqual(_deserialized.Count);
+            _headers.Count.ShouldEqual(_deserialized.Headers.Count);
         }
 
         [Fact]
         public void should_deserialize_the_the_complex_types_within_the_event_messages()
         {
-            _deserialized.Last().Value.ShouldBeInstanceOf<SimpleMessage>();
+            _deserialized.Headers.Last().Value.ShouldBeInstanceOf<SimpleMessage>();
         }
 
         public when_serializing_a_list_of_commit_headers(SerializerFixture data) : base(data)
@@ -144,13 +147,31 @@
     public class when_serializing_an_untyped_payload_on_a_snapshot : SerializationConcern
     {
         private Snapshot _deserialized;
-        private IDictionary<string, List<int>> _payload;
+        private TestPayLoad _payload;
         private byte[] _serialized;
         private Snapshot _snapshot;
 
+        [DataContract(Name="testpayload")]
+        public class TestPayLoad
+        {
+            public TestPayLoad()
+                : this(new Dictionary<string, List<int>>())
+            {
+                
+            }
+
+            public TestPayLoad(IDictionary<string, List<int>> data)
+            {
+                Data = data;
+            }
+
+            [DataMember(Order=1)]
+            public IDictionary<string, List<int>> Data { get; set; }
+        }
+
         protected override void Context()
         {
-            _payload = new Dictionary<string, List<int>>();
+            _payload = new TestPayLoad();
             _snapshot = new Snapshot(Guid.NewGuid().ToString(), 42, _payload);
             _serialized = Serializer.Serialize(_snapshot);
         }
@@ -163,7 +184,9 @@
         [Fact]
         public void should_correctly_deserialize_the_untyped_payload_contents()
         {
-            _deserialized.Payload.ShouldEqual(_snapshot.Payload);
+            var actual = (TestPayLoad)_deserialized.Payload;
+            var expected = (TestPayLoad)_snapshot.Payload;
+            actual.Data.ShouldEqual(expected.Data);
         }
 
         [Fact]
@@ -175,6 +198,7 @@
         public when_serializing_an_untyped_payload_on_a_snapshot(SerializerFixture data) : base(data)
         {}
     }
+
     public class SerializationConcern : SpecificationBase2, IClassFixture<SerializerFixture>
     {
         private SerializerFixture _data;

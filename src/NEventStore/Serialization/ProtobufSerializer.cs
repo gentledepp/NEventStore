@@ -5,18 +5,15 @@ namespace NEventStore.Serialization
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
+    using System.Runtime.Serialization.Formatters.Binary;
     using NEventStore.Logging;
     using ProtoBuf;
     using ProtoBuf.Meta;
-
-
+    
     // see: https://lostechies.com/gabrielschenker/2012/06/30/how-we-got-rid-of-the-databasepart-6/
-
     public class ProtobufSerializer : ISerialize
     {
         private static readonly ILog Logger = LogFactory.BuildLogger(typeof(ProtobufSerializer));
-        private readonly IEnumerable<Type> _knownTypes = new[] { typeof(List<EventMessage>), typeof(Dictionary<string, object>) };
-
 
         readonly IDictionary<Type, Formatter> _type2Contract = new Dictionary<Type, Formatter>();
         readonly IDictionary<string, Type> _contractName2Type = new Dictionary<string, Type>();
@@ -35,19 +32,33 @@ namespace NEventStore.Serialization
             }
         }
 
+        internal static ProtobufSerializer Instance { get; set; }
+
+        static ProtobufSerializer()
+        {
+            RuntimeTypeModel.Default.Add(typeof(Snapshot), false).SetSurrogate(typeof(SnapshotSurrogate));
+            RuntimeTypeModel.Default.Add(typeof(EventMessage), false).SetSurrogate(typeof(EventMessageSurrogate));
+        }
+
         public ProtobufSerializer(params Type[] knownEventTypes)
         {
+            var eventTypes = new List<Type>();
             if (knownEventTypes == null || knownEventTypes.Length == 0)
             {
-                knownEventTypes = MessagesProvider.GetKnownEventTypes();
+                eventTypes = MessagesProvider.GetKnownEventTypes().ToList();
             }
+            else
+            {
+                eventTypes.AddRange(knownEventTypes);
+            }
+            eventTypes.AddRange(new [] { typeof(string), typeof(int), typeof(long), typeof(double), typeof(Guid), typeof(short)});
 
-            foreach (var type in knownEventTypes)
+            foreach (var type in eventTypes)
             {
                 Logger.Debug(Messages.RegisteringKnownType, type);
             }
             
-            _type2Contract = knownEventTypes.ToDictionary
+            _type2Contract = eventTypes.ToDictionary
             (t => t,
                 t =>
                 {
@@ -55,9 +66,12 @@ namespace NEventStore.Serialization
                     return new Formatter(t.GetContractName(), formatter.Deserialize,
                         (o, stream) => formatter.Serialize(stream, o));
                 });
-            _contractName2Type = knownEventTypes.ToDictionary(
+            _contractName2Type = eventTypes.ToDictionary(
                 t => t.GetContractName(),
                 t => t);
+
+            // ugly hack!!
+            Instance = this;
         }
 
         public virtual void Serialize<T>(Stream output, T graph)
@@ -67,9 +81,13 @@ namespace NEventStore.Serialization
             Type t = typeof(T);
             if (!_type2Contract.TryGetValue(t, out formatter))
             {
-                var s = $"Can't find a serializer for unknown object type '{t.FullName}'.Have you passed all known types to the constructor?";
-                throw new InvalidOperationException(s);
+                //var s = $"Can't find a serializer for unknown object type '{t.FullName}'.Have you passed all known types to the constructor?";
+                //throw new InvalidOperationException(s);
+                var f = RuntimeTypeModel.Default.CreateFormatter(t);
+                formatter = new Formatter(String.Empty, f.Deserialize,
+                    (o, stream) => f.Serialize(stream, o));
             }
+
             formatter.SerializeDelegate(graph, output);
         }
 
@@ -86,8 +104,9 @@ namespace NEventStore.Serialization
             Type t = typeof(T);
             if (!_type2Contract.TryGetValue(t, out value))
             {
-                var s = $"Can't find a serializer for unknown object type '{t.FullName}'.Have you passed all known types to the constructor?";
-                throw new InvalidOperationException(s);
+                var f = RuntimeTypeModel.Default.CreateFormatter(t);
+                value = new Formatter(String.Empty, f.Deserialize,
+                    (o, stream) => f.Serialize(stream, o));
             }
 
             return (T)value.DeserializerDelegate(input);
@@ -107,8 +126,59 @@ namespace NEventStore.Serialization
             return value.DeserializerDelegate(input);
         }
 
+        private void Serialize(object instance, Type type, Stream destinationStream)
+        {
+            Formatter formatter;
+
+            if (type.IsValueType || type == typeof(string))
+            {
+                var f = RuntimeTypeModel.Default.CreateFormatter(type);
+                formatter = new Formatter(String.Empty, f.Deserialize,
+                    (o, stream) => f.Serialize(stream, o));
+            }
+            else if (!_type2Contract.TryGetValue(type, out formatter))
+            {
+                var s = $"Can't find a serializer for unknown object type '{type.FullName}'.Have you passed all known types to the constructor?";
+                throw new InvalidOperationException(s);
+            }
+
+            formatter.SerializeDelegate(instance, destinationStream);
+        }
+
+        public byte[] SerializeEvent(object e)
+        {
+            if(e == null)
+                return new byte[0];
+
+            byte[] content;
+            using (var ms = new MemoryStream())
+            {
+                Serialize(e, e.GetType(), ms);
+                content = ms.ToArray();
+            }
+            byte[] messageContractBuffer;
+            using (var ms = new MemoryStream())
+            {
+                var name = e.GetType().GetContractName();
+                var messageContract = new MessageContract(name, content.Length, 0);
+                Serialize(messageContract, typeof(MessageContract), ms);
+                messageContractBuffer = ms.ToArray();
+            }
+            using (var ms = new MemoryStream())
+            {
+                var headerContract = new MessageHeaderContract(messageContractBuffer.Length);
+                headerContract.WriteHeader(ms);
+                ms.Write(messageContractBuffer, 0, messageContractBuffer.Length);
+                ms.Write(content, 0, content.Length);
+                return ms.ToArray();
+            }
+        }
+
         public object DeserializeEvent(byte[] buffer)
         {
+            if (buffer == null || buffer.Length == 0)
+                return null;
+
             using (var ms = new MemoryStream(buffer))
             {
                 var header = MessageHeaderContract.ReadHeader(buffer);
@@ -131,7 +201,6 @@ namespace NEventStore.Serialization
                 }
             }
         }
-
     }
 
     public static class MessagesProvider
@@ -140,15 +209,15 @@ namespace NEventStore.Serialization
         {
             var types = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetExportedTypes()
-                    .Where(t => (t.GetCustomAttributes(typeof(DataContractAttribute), true).Any() 
-                            /*|| t.GetCustomAttributes(typeof(ProtoContractAttribute), true).Any()*/) 
+                    .Where(t => (t.GetCustomAttributes(typeof(DataContractAttribute), true).Any()) 
                          && t.IsAbstract == false)
                          )
-                .Union(new[] { typeof(MessageContract), typeof(EventMessage) })
+                .Union(new[] { typeof(MessageContract) })
                 .ToArray();
             return types;
         }
     }
+
     [DataContract(Namespace="nes.proto", Name="mc")]
     public sealed class MessageContract
     {
@@ -195,15 +264,134 @@ namespace NEventStore.Serialization
     {
         public static string GetContractName(this Type self)
         {
-            var attr = (DataContractAttribute) self.GetCustomAttributes(typeof(DataContractAttribute), false).FirstOrDefault();
+            string n = null;
+            string ns = null;
 
-            if(attr == null)
-                throw new InvalidOperationException($"The type '{self.FullName}' cannot be serialized as it does not have a '[DataContract]' attribute");
+            if (self == typeof(string) || self.IsValueType)
+            {
+                n = self.Name.ToLower();
+            }
+            else
+            {
+                var attr = (DataContractAttribute)self.GetCustomAttributes(typeof(DataContractAttribute), false).FirstOrDefault();
 
-            if(string.IsNullOrWhiteSpace(attr.Namespace) && string.IsNullOrWhiteSpace(attr.Name))
+                if (attr == null)
+                    throw new InvalidOperationException($"The type '{self.FullName}' cannot be serialized as it does not have a '[DataContract]' attribute");
+
+                n = attr.Name;
+                ns = attr.Namespace;
+            }
+
+            if (string.IsNullOrWhiteSpace(n))
                 throw new InvalidOperationException($"Please specify Name and (optionally) Namespace in the DataContract of '{self.FullName}'");
 
-            return $"{attr.Namespace}.{attr.Name}";
-        }        
+            var @namespace = string.IsNullOrWhiteSpace(ns) ? null : $"{ns}.";
+            return $"{@namespace}{n}";
+        }
+    }
+
+    [DataContract(Namespace = "nes", Name = "sh")]
+    public sealed class SnapshotSurrogate
+    {
+        [DataMember(Order = 1)]
+        public string BucketId { get; set; }
+
+        /// <summary>
+        ///     Gets the value which uniquely identifies the stream to which the snapshot applies.
+        /// </summary>
+        [DataMember(Order = 2)]
+        public string StreamId { get; set; }
+
+        /// <summary>
+        ///     Gets the position at which the snapshot applies.
+        /// </summary>
+        [DataMember(Order = 3)]
+        public int StreamRevision { get; set; }
+
+        /// <summary>
+        ///     Gets the snapshot or materialized view of the stream at the revision indicated.
+        /// </summary>
+        [DataMember(Order = 4)]
+        public byte[] Payload { get; set; }
+
+        public static implicit operator Snapshot(SnapshotSurrogate suggorage)
+        {
+            if (suggorage == null)
+                return null;
+            //object payload = Deserialize(suggorage.Payload);
+            object payload = ProtobufSerializer.Instance.DeserializeEvent(suggorage.Payload);
+            return new Snapshot(suggorage.BucketId, suggorage.StreamId, suggorage.StreamRevision, payload);
+        }
+
+        public static implicit operator SnapshotSurrogate(Snapshot source)
+        {
+            return source == null ? null : new SnapshotSurrogate
+            {
+                BucketId = source.BucketId,
+                StreamId = source.StreamId,
+                StreamRevision = source.StreamRevision,
+                //Payload = Serialize(source.Payload)
+                Payload = ProtobufSerializer.Instance.SerializeEvent(source.Payload)
+            };
+        }
+    }
+
+    [DataContract(Namespace = "nes", Name = "em")]
+    public class EventMessageSurrogate
+    {
+        /// <summary>
+        ///     Gets the metadata which provides additional, unstructured information about this message.
+        /// </summary>
+        [DataMember(Order = 1)]
+        public byte[] Headers { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the actual event message body.
+        /// </summary>
+        [DataMember(Order = 2)]
+        public byte[] Body { get; set; }
+        
+        public static implicit operator EventMessage(EventMessageSurrogate suggorage)
+        {
+            return suggorage == null ? null : new EventMessage
+            {
+                Headers = (Dictionary<string, object>)Deserialize(suggorage.Headers),
+                Body = ProtobufSerializer.Instance.DeserializeEvent(suggorage.Body)
+            };
+        }
+
+        public static implicit operator EventMessageSurrogate(EventMessage source)
+        {
+            return source == null ? null : new EventMessageSurrogate
+            {
+                Headers = Serialize(source.Headers),
+                Body = ProtobufSerializer.Instance.SerializeEvent(source.Body)
+            };
+        }
+
+        private static byte[] Serialize(object o)
+        {
+            if (o == null)
+                return null;
+
+            using (var ms = new MemoryStream())
+            {
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(ms, o);
+                return ms.ToArray();
+            }
+        }
+
+        private static object Deserialize(byte[] b)
+        {
+            if (b == null)
+                return null;
+
+            using (var ms = new MemoryStream(b))
+            {
+                var formatter = new BinaryFormatter();
+                return formatter.Deserialize(ms);
+            }
+        }
     }
 }
