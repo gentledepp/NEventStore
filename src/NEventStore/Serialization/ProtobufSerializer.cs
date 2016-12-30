@@ -46,7 +46,7 @@ namespace NEventStore.Serialization
             {
                 Logger.Debug(Messages.RegisteringKnownType, type);
             }
-
+            
             _type2Contract = knownEventTypes.ToDictionary
             (t => t,
                 t =>
@@ -65,7 +65,7 @@ namespace NEventStore.Serialization
             Logger.Verbose(Messages.SerializingGraph, typeof(T));
             Formatter formatter;
             Type t = typeof(T);
-            if(!_type2Contract.TryGetValue(t, out formatter))
+            if (!_type2Contract.TryGetValue(t, out formatter))
             {
                 var s = $"Can't find a serializer for unknown object type '{t.FullName}'.Have you passed all known types to the constructor?";
                 throw new InvalidOperationException(s);
