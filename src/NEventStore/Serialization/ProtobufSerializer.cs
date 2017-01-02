@@ -90,13 +90,19 @@ namespace NEventStore.Serialization
 
         protected virtual void AddSimpleTypes()
         {
-            AddFormatter(typeof(string), "str");
-            AddFormatter(typeof(int), "i32");
+            AddFormatter(typeof(string), "s");
+            AddFormatter(typeof(char), "c");
             AddFormatter(typeof(short), "i16");
+            AddFormatter(typeof(int), "i32");
             AddFormatter(typeof(long), "i64");
+            AddFormatter(typeof(ushort), "u16");
+            AddFormatter(typeof(uint), "u32");
+            AddFormatter(typeof(ulong), "u64");
             AddFormatter(typeof(double), "dbl");
             AddFormatter(typeof(float), "sng");
-            AddFormatter(typeof(Guid), "guid");
+            AddFormatter(typeof(decimal), "dec");
+            AddFormatter(typeof(bool), "b");
+            AddFormatter(typeof(Guid), "g");
         }
 
         private void AddFormatter(Type type, string contractName)
@@ -375,11 +381,16 @@ namespace NEventStore.Serialization
     [DataContract(Namespace = "nes", Name = "em")]
     public class EventMessageSurrogate
     {
+        public EventMessageSurrogate()
+        {
+            Headers = new List<KeyValuePairSurrogate>();
+        }
+
         /// <summary>
         ///     Gets the metadata which provides additional, unstructured information about this message.
         /// </summary>
         [DataMember(Order = 1)]
-        public byte[] Headers { get; set; }
+        public List<KeyValuePairSurrogate> Headers { get; set; }
 
         /// <summary>
         ///     Gets or sets the actual event message body.
@@ -391,7 +402,7 @@ namespace NEventStore.Serialization
         {
             return suggorage == null ? null : new EventMessage
             {
-                Headers = (Dictionary<string, object>)Deserialize(suggorage.Headers),
+                Headers = Deserialize(suggorage.Headers),
                 Body = ProtobufSerializer.Instance.DeserializeEvent(suggorage.Body)
             };
         }
@@ -405,29 +416,53 @@ namespace NEventStore.Serialization
             };
         }
 
-        private static byte[] Serialize(object o)
+        private static List<KeyValuePairSurrogate> Serialize(Dictionary<string, object> o)
         {
-            if (o == null)
-                return null;
+            var list = new List<KeyValuePairSurrogate>();
 
-            using (var ms = new MemoryStream())
+            if (o == null)
+                return list;
+            
+            foreach (var kvp in o)
             {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, o);
-                return ms.ToArray();
+                list.Add(new KeyValuePairSurrogate(kvp.Key, ProtobufSerializer.Instance.SerializeEvent(kvp.Value)));
             }
+
+            return list;
         }
 
-        private static object Deserialize(byte[] b)
+        private static Dictionary<string, object> Deserialize(List<KeyValuePairSurrogate> b)
         {
+            var dict = new Dictionary<string, object>();
             if (b == null)
-                return null;
+                return dict;
 
-            using (var ms = new MemoryStream(b))
+            foreach (var kvp in b)
             {
-                var formatter = new BinaryFormatter();
-                return formatter.Deserialize(ms);
+                dict.Add(kvp.Key, ProtobufSerializer.Instance.DeserializeEvent(kvp.Value));
             }
+
+            return dict;
+        }
+
+        [ProtoContract]
+        public class KeyValuePairSurrogate
+        {
+            public KeyValuePairSurrogate()
+            {
+                
+            }
+
+            public KeyValuePairSurrogate(string key, byte[] value)
+            {
+                Key = key;
+                Value = value;
+            }
+
+            [ProtoMember(1)]
+            public string Key { get; set; }
+            [ProtoMember(2)]
+            public byte[] Value { get; set; }
         }
     }
 }
