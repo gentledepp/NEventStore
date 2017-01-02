@@ -151,6 +151,7 @@
         private byte[] _serialized;
         private Snapshot _snapshot;
 
+        [Serializable]
         [DataContract(Name="testpayload")]
         public class TestPayLoad
         {

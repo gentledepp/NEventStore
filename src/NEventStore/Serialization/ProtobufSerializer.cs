@@ -16,6 +16,7 @@ namespace NEventStore.Serialization
         private static readonly ILog Logger = LogFactory.BuildLogger(typeof(ProtobufSerializer));
 
         readonly IDictionary<Type, Formatter> _type2Contract = new Dictionary<Type, Formatter>();
+        readonly IDictionary<Type, string> _type2ContractName = new Dictionary<Type, string>();
         readonly IDictionary<string, Type> _contractName2Type = new Dictionary<string, Type>();
 
         protected sealed class Formatter
@@ -51,27 +52,62 @@ namespace NEventStore.Serialization
             {
                 eventTypes.AddRange(knownEventTypes);
             }
-            eventTypes.AddRange(new [] { typeof(string), typeof(int), typeof(long), typeof(double), typeof(Guid), typeof(short)});
+            
+            var simpleTypes = new Type[] { typeof(string), typeof(int), typeof(long), typeof(double), typeof(Guid), typeof(short)};
 
-            foreach (var type in eventTypes)
+            foreach (var type in simpleTypes.Concat(eventTypes))
             {
                 Logger.Debug(Messages.RegisteringKnownType, type);
             }
-            
-            _type2Contract = eventTypes.ToDictionary
+
+            // add simple types as well
+            AddSimpleTypes();
+
+            var t2c = eventTypes.ToDictionary
             (t => t,
                 t =>
                 {
                     var formatter = RuntimeTypeModel.Default.CreateFormatter(t);
-                    return new Formatter(t.GetContractName(), formatter.Deserialize,
+                    return new Formatter(t.GetContractName(_type2ContractName), formatter.Deserialize,
                         (o, stream) => formatter.Serialize(stream, o));
                 });
-            _contractName2Type = eventTypes.ToDictionary(
-                t => t.GetContractName(),
+            foreach (var t in t2c)
+            {
+                _type2Contract.Add(t.Key, t.Value);
+            }
+
+            var c2t = eventTypes.ToDictionary(
+                t => t.GetContractName(_type2ContractName),
                 t => t);
+            foreach (var t in c2t)
+            {
+                _contractName2Type.Add(t.Key, t.Value);
+            }
 
             // ugly hack!!
             Instance = this;
+        }
+
+        protected virtual void AddSimpleTypes()
+        {
+            AddFormatter(typeof(string), "str");
+            AddFormatter(typeof(int), "i32");
+            AddFormatter(typeof(short), "i16");
+            AddFormatter(typeof(long), "i64");
+            AddFormatter(typeof(double), "dbl");
+            AddFormatter(typeof(float), "sng");
+            AddFormatter(typeof(Guid), "guid");
+        }
+
+        private void AddFormatter(Type type, string contractName)
+        {
+            var formatter = RuntimeTypeModel.Default.CreateFormatter(type);
+            var f = new Formatter(contractName, formatter.Deserialize,
+                (o, stream) => formatter.Serialize(stream, o));
+
+            _type2Contract.Add(type, f);
+            _type2ContractName.Add(type, contractName);
+            _contractName2Type.Add(contractName, type);
         }
 
         public virtual void Serialize<T>(Stream output, T graph)
@@ -159,7 +195,7 @@ namespace NEventStore.Serialization
             byte[] messageContractBuffer;
             using (var ms = new MemoryStream())
             {
-                var name = e.GetType().GetContractName();
+                var name = e.GetType().GetContractName(_type2ContractName);
                 var messageContract = new MessageContract(name, content.Length, 0);
                 Serialize(messageContract, typeof(MessageContract), ms);
                 messageContractBuffer = ms.ToArray();
@@ -262,14 +298,14 @@ namespace NEventStore.Serialization
 
     internal static class ComponentModelExtensions
     {
-        public static string GetContractName(this Type self)
+        public static string GetContractName(this Type self, IDictionary<Type, string> type2Contract = null)
         {
             string n = null;
             string ns = null;
 
-            if (self == typeof(string) || self.IsValueType)
+            if (type2Contract != null && (self == typeof(string) || self.IsValueType))
             {
-                n = self.Name.ToLower();
+                n = type2Contract[self];
             }
             else
             {
