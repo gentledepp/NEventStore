@@ -76,9 +76,11 @@ namespace NEventStore.Serialization
                 _type2Contract.Add(t.Key, t.Value);
             }
 
-            var c2t = eventTypes.ToDictionary(
-                t => t.GetContractName(_type2ContractName),
-                t => t);
+            var c2t = eventTypes
+                .Where(t => t.GetContractName(_type2ContractName) != null)
+                .ToDictionary(
+                    t => t.GetContractName(_type2ContractName),
+                    t => t);
             foreach (var t in c2t)
             {
                 _contractName2Type.Add(t.Key, t.Value);
@@ -308,6 +310,11 @@ namespace NEventStore.Serialization
         {
             string n = null;
             string ns = null;
+
+            // as eventmessage and snapshot are not serialized directly, but by surrogates, ignore their contract
+            if (self == typeof(EventMessage) ||
+                self == typeof(Snapshot))
+                return null;
 
             if (type2Contract != null && (self == typeof(string) || self.IsValueType))
             {
