@@ -32,6 +32,7 @@ namespace NEventStore.Persistence
             : base(message, innerException)
         {}
 
+#if !WINDOWS_UWP
         /// <summary>
         ///     Initializes a new instance of the StorageException class.
         /// </summary>
@@ -40,5 +41,6 @@ namespace NEventStore.Persistence
         protected StorageException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {}
+#endif
     }
 }

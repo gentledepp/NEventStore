@@ -1,5 +1,6 @@
 namespace NEventStore.Serialization
 {
+#if FRAMEWORK
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -9,7 +10,6 @@ namespace NEventStore.Serialization
     using NEventStore.Logging;
     using ProtoBuf;
     using ProtoBuf.Meta;
-    
     // see: https://lostechies.com/gabrielschenker/2012/06/30/how-we-got-rid-of-the-databasepart-6/
     public class ProtobufSerializer : ISerialize
     {
@@ -472,4 +472,5 @@ namespace NEventStore.Serialization
             public byte[] Value { get; set; }
         }
     }
+#endif
 }

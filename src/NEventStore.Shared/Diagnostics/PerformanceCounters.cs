@@ -15,6 +15,8 @@ namespace NEventStore.Diagnostics
         private const string TotalSnapshotsName = "Total Snapshots";
         private const string SnapshotsRateName = "Snapshots/Sec";
         private const string UndispatchedQueue = "Undispatched Queue Length";
+
+#if FRAMEWORK
         private readonly PerformanceCounter _avgCommitDuration;
         private readonly PerformanceCounter _avgCommitDurationBase;
         private readonly PerformanceCounter _commitsRate;
@@ -119,4 +121,39 @@ namespace NEventStore.Diagnostics
             _undispatchedCommits.Dispose();
         }
     }
+#else
+        static PerformanceCounters()
+        {}
+
+        public PerformanceCounters(string instanceName)
+        {}
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public void CountCommit(int eventsCount, long elapsedMilliseconds)
+        {
+        }
+
+        public void CountSnapshot()
+        {
+        }
+
+        public void CountCommitDispatched()
+        {
+        }
+
+        ~PerformanceCounters()
+        {
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+        }
+    }
+#endif
 }

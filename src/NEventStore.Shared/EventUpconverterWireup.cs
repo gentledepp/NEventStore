@@ -36,14 +36,21 @@ namespace NEventStore
 
         private static IEnumerable<Assembly> GetAllAssemblies()
         {
+#if WINDOWS_UWP || PCL
+            throw new NotImplementedException();
+#else
             return Assembly.GetCallingAssembly()
                            .GetReferencedAssemblies()
                            .Select(Assembly.Load)
                            .Concat(new[] {Assembly.GetCallingAssembly()});
+#endif
         }
 
         private static IDictionary<Type, Func<object, object>> GetConverters(IEnumerable<Assembly> toScan)
         {
+#if WINDOWS_UWP || PCL
+            throw new NotImplementedException();
+#else
             IEnumerable<KeyValuePair<Type, Func<object, object>>> c = from a in toScan
                                                                       from t in a.GetTypes()
                                                                       where !t.IsAbstract
@@ -62,6 +69,7 @@ namespace NEventStore
             {
                 throw new MultipleConvertersFoundException(e.Message, e);
             }
+#endif
         }
 
         public virtual EventUpconverterWireup WithConvertersFrom(params Assembly[] assemblies)
@@ -73,7 +81,7 @@ namespace NEventStore
 
         public virtual EventUpconverterWireup WithConvertersFromAssemblyContaining(params Type[] converters)
         {
-            IEnumerable<Assembly> assemblies = converters.Select(c => c.Assembly).Distinct();
+            IEnumerable<Assembly> assemblies = converters.Select(c => c.GetTypeInfo().Assembly).Distinct();
             Logger.Debug(Messages.EventUpconvertersLoadedFrom, string.Concat(", ", assemblies));
             _assembliesToScan.AddRange(assemblies);
             return this;

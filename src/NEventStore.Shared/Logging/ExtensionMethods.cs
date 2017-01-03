@@ -14,16 +14,22 @@ namespace NEventStore.Logging
                 CultureInfo.InvariantCulture,
                 MessageFormat,
                 SystemTime.UtcNow,
-                Thread.CurrentThread.GetName(),
+                GetThreadName(),
                 typeToLog.FullName,
                 string.Format(CultureInfo.InvariantCulture, message, values));
         }
 
-        private static string GetName(this Thread thread)
+        private static string GetThreadName()
         {
+#if WINDOWS_UWP
+            return string.Empty;
+#else
+            var thread = Thread.CurrentThread;
+
             return !string.IsNullOrEmpty(thread.Name)
                 ? thread.Name
                 : thread.ManagedThreadId.ToString(CultureInfo.InvariantCulture);
+#endif
         }
     }
 }

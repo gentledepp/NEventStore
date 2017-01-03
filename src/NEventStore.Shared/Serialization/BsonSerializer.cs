@@ -3,6 +3,7 @@ namespace NEventStore.Serialization
     using System;
     using System.Collections;
     using System.IO;
+    using System.Reflection;
     using NEventStore.Logging;
     using Newtonsoft.Json.Bson;
 
@@ -27,7 +28,7 @@ namespace NEventStore.Serialization
 
         private static bool IsArray(Type type)
         {
-            bool array = typeof (IEnumerable).IsAssignableFrom(type) && !typeof (IDictionary).IsAssignableFrom(type);
+            bool array = typeof (IEnumerable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) && !typeof (IDictionary).IsAssignableFrom(type);
 
             Logger.Verbose(Messages.TypeIsArray, type, array);
 

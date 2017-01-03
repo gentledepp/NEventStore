@@ -32,6 +32,7 @@ namespace NEventStore
             : base(message, innerException)
         {}
 
+#if !WINDOWS_UWP
         /// <summary>
         ///     Initializes a new instance of the StreamNotFoundException class.
         /// </summary>
@@ -40,5 +41,6 @@ namespace NEventStore
         protected StreamNotFoundException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {}
+#endif
     }
 }

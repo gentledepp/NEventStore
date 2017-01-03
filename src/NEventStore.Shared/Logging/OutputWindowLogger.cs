@@ -55,7 +55,9 @@ namespace NEventStore.Logging
         {
             lock (Sync)
             {
+#if !WINDOWS_UWP && !PCL
                 Trace.WriteLine(category, message.FormatMessage(_typeToLog, values));
+#endif
             }
         }
     }

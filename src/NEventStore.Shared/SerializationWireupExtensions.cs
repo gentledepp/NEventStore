@@ -1,12 +1,17 @@
 namespace NEventStore
 {
+    using System;
     using NEventStore.Serialization;
 
     public static class SerializationWireupExtensions
     {
         public static SerializationWireup UsingBinarySerialization(this PersistenceWireup wireup)
         {
+#if WINDOWS_UWP || PCL
+            throw new NotSupportedException("BinarySerializer is not available on UWP");
+#else
             return wireup.UsingCustomSerialization(new BinarySerializer());
+#endif
         }
 
         public static SerializationWireup UsingCustomSerialization(this PersistenceWireup wireup, ISerialize serializer)

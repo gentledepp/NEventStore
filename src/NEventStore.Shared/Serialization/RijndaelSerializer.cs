@@ -15,6 +15,9 @@ namespace NEventStore.Serialization
 
         public RijndaelSerializer(ISerialize inner, byte[] encryptionKey)
         {
+#if WINDOWS_UWP
+            throw new NotSupportedException("RijndaelManaged algorithm is not available on UWP");
+#endif
             if (!KeyIsValid(encryptionKey, KeyLength))
             {
                 throw new ArgumentException(Messages.InvalidKeyLength, "encryptionKey");
@@ -28,6 +31,7 @@ namespace NEventStore.Serialization
         {
             Logger.Verbose(Messages.SerializingGraph, typeof (T));
 
+#if !WINDOWS_UWP && !PCL
             using (var rijndael = new RijndaelManaged())
             {
                 rijndael.Key = _encryptionKey;
@@ -44,12 +48,16 @@ namespace NEventStore.Serialization
                     encryptionStream.FlushFinalBlock();
                 }
             }
+#else
+            throw new NotSupportedException("RijndaelManaged algorithm is not available on UWP");
+#endif
         }
 
         public virtual T Deserialize<T>(Stream input)
         {
             Logger.Verbose(Messages.DeserializingStream, typeof (T));
 
+#if !WINDOWS_UWP && !PCL
             using (var rijndael = new RijndaelManaged())
             {
                 rijndael.Key = _encryptionKey;
@@ -60,6 +68,9 @@ namespace NEventStore.Serialization
                 using (var decryptedStream = new CryptoStream(input, decryptor, CryptoStreamMode.Read))
                     return _inner.Deserialize<T>(decryptedStream);
             }
+#else
+            throw new NotSupportedException("RijndaelManaged algorithm is not available on UWP");
+#endif
         }
 
         private static bool KeyIsValid(ICollection key, int length)
