@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>NEventStore</id>
-    <version>5.0</version>
+    <version>5.0.1</version>
     <title>NEventStore</title>
     <authors>NEventStore Dev Team</authors>
     <owners>NEventStore Dev Team</owners>
@@ -12,9 +12,49 @@
     <summary>NEventStore is a persistence agnostic event sourcing library for .NET. The primary use is most often associated with CQRS.</summary>
     <language>es-US</language>
     <tags>events, event sourcing, cqrs, storage, persistence, database</tags>
-	<releaseNotes>v5.x is not backwards compatible with v4.x. Please check the release notes on github.</releaseNotes>
+    <releaseNotes>v5.x is not backwards compatible with v4.x. Please check the release notes on github.</releaseNotes>
+    <dependencies>
+      <group targetFramework="MonoAndroid4.0.3">
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="protobuf-net" version="2.1.0" />
+        <dependency id="System.Reactive.Core" version="3.1.1" />
+        <dependency id="System.Reactive.Interfaces" version="3.1.1" />
+        <dependency id="System.Reactive.Linq" version="3.1.1" />
+      </group>
+      <group targetFramework=".NETFramework4.5.2">
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="protobuf-net" version="2.1.0" />
+        <dependency id="System.Reactive.Core" version="3.1.1" />
+        <dependency id="System.Reactive.Interfaces" version="3.1.1" />
+        <dependency id="System.Reactive.Linq" version="3.1.1" />
+      </group>
+      <group targetFramework=".NETPortable0.0-net45+sl50+win+wpa81+wp80">
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="System.Reactive.Core" version="3.1.1" />
+        <dependency id="System.Reactive.Interfaces" version="3.1.1" />
+        <dependency id="System.Reactive.Linq" version="3.1.1" />
+      </group>
+      <group targetFramework="Windows8.1">
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="protobuf-net" version="2.1.0" />
+        <dependency id="System.Reactive.Core" version="3.1.1" />
+        <dependency id="System.Reactive.Interfaces" version="3.1.1" />
+        <dependency id="System.Reactive.Linq" version="3.1.1" />
+      </group>
+      <group targetFramework="Xamarin.iOS1.0">
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="protobuf-net" version="2.1.0" />
+        <dependency id="System.Reactive.Core" version="3.1.1" />
+        <dependency id="System.Reactive.Interfaces" version="3.1.1" />
+        <dependency id="System.Reactive.Linq" version="3.1.1" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
-    <file src="publish-net40\bin\**" target="lib\net40"/>
-  </files>  
+    <file src="output\net\NEventStore*" target="lib\net452"/>
+    <file src="output\pcl\NEventStore*" target="lib\portable-net45+sl50+win+wpa81+wp80"/>
+    <file src="output\droid\NEventStore*" target="lib\monoandroid403"/>
+    <file src="output\ios\NEventStore*" target="lib\xamarinios1.0"/>
+    <file src="output\uwp\NEventStore*" target="lib\win81"/>
+  </files>
 </package>

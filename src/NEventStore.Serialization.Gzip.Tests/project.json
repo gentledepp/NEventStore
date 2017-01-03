@@ -6,7 +6,8 @@
     "xunit.core": "2.1.0",
     "xunit.extensibility.core": "2.1.0",
     "xunit.extensibility.execution": "2.1.0",
-    "XUnit2Should": "5.0.0"       
+    "xunit.runner.console": "2.1.0",
+    "XUnit2Should": "5.0.0"
   },
   "frameworks": {
     "net452": {}
@@ -14,4 +15,4 @@
   "runtimes": {
     "win": {}
   }
-}.
+}

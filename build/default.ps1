@@ -1,18 +1,31 @@
+
+function getTestRunner([string]$packagePath ){
+	$testRunners = @(gci $nuget_packages_dir -rec -filter xunit.console.x86.exe)
+	if ($testRunners.Length -ne 1)
+	{
+		throw "Expected to find 1 xunit.console.x86.exe, but found $($testRunners.Length)."
+	}
+
+	$testRunner = $testRunners[0].FullName
+	$testRunner
+}
+
 properties {
-    $base_directory = Resolve-Path ..
-    $publish_directory = "$base_directory\publish-net40"
+    $base_directory = Resolve-Path ".."
+    $publish_directory = "$base_directory\publish"
     $build_directory = "$base_directory\build"
     $src_directory = "$base_directory\src"
     $output_directory = "$base_directory\output"
     $packages_directory = "$src_directory\packages"
     $sln_file = "$src_directory\NEventStore.sln"
     $target_config = "Release"
-    $framework_version = "v4.0"
+    $framework_version = "v4.5.2"
 
     $assemblyInfoFilePath = "$src_directory\VersionAssemblyInfo.cs"
+	
+	$msbuild = "C:\Program Files (x86)\MSBuild\14.0\Bin\MsBuild.exe"
 
-    $xunit_path = "$base_directory\bin\xunit.runners.1.9.1\tools\xunit.console.clr4.exe"
-    $ilMergeModule.ilMergePath = "$base_directory\bin\ilmerge-bin\ILMerge.exe"
+    #$ilMergeModule.ilMergePath = "$base_directory\bin\ilmerge-bin\ILMerge.exe"
     $nuget_dir = "$src_directory\.nuget"
 
     if($build_number -eq $null) {
@@ -22,6 +35,12 @@ properties {
     if($runPersistenceTests -eq $null) {
     	$runPersistenceTests = $false
     }
+
+	$up = [System.Environment]::ExpandEnvironmentVariables("%UserProfile%")
+	$nuget_packages_dir = "$up\.nuget\packages"
+
+
+	$xunit_path = getTestRunner -packagePath $nuget_packages_dir#"$base_directory\bin\xunit.runners.1.9.1\tools\xunit.console.clr4.exe"
 }
 
 task default -depends Build
@@ -38,8 +57,8 @@ task UpdateVersion {
 }
 
 task Compile {
-	exec { msbuild /nologo /verbosity:quiet $sln_file /p:Configuration=$target_config /t:Clean }
-	exec { msbuild /nologo /verbosity:quiet $sln_file /p:Configuration=$target_config /p:TargetFrameworkVersion=v4.0 }
+	exec { & $msbuild /nologo /verbosity:quiet $sln_file /p:Configuration=$target_config /t:Clean }
+	exec { & $msbuild /nologo /verbosity:quiet $sln_file /p:Configuration=$target_config }#/p:TargetFrameworkVersion=v4.5.2 }
 }
 
 task Test -depends RunUnitTests, RunSerializationTests
@@ -47,32 +66,32 @@ task Test -depends RunUnitTests, RunSerializationTests
 task RunUnitTests {
 	"Unit Tests"
 	EnsureDirectory $output_directory
-	Invoke-XUnit -Path $src_directory -TestSpec '*NEventStore.Tests.dll' `
-    -SummaryPath $output_directory\unit_tests.xml `
-    -XUnitPath $xunit_path
+	#Invoke-XUnit -Path $src_directory -TestSpec '*NEventStore.Tests.dll' `
+    #-SummaryPath $output_directory\unit_tests.xml `
+    #-XUnitPath $xunit_path
 }
 
 task RunSerializationTests {
 	"Serialization Tests"
 	EnsureDirectory $output_directory
-	Invoke-XUnit -Path $src_directory -TestSpec '*Serialization.*.Tests.dll' `
-    -SummaryPath $output_directory\serialization_tests.xml `
-    -XUnitPath $xunit_path
+	#Invoke-XUnit -Path $src_directory -TestSpec '*Serialization.*.Tests.dll' `
+    #-SummaryPath $output_directory\serialization_tests.xml `
+    #-XUnitPath $xunit_path
 }
 
 task Package -depends Build, PackageNEventStore {
-	move $output_directory $publish_directory
+	#move $output_directory $publish_directory
 }
 
 task PackageNEventStore -depends Clean, Compile {
 	mkdir "$publish_directory\bin" | out-null
-	Merge-Assemblies -outputFile "$publish_directory/bin/NEventStore.dll" -files @(
-		"$src_directory/NEventStore/bin/$target_config/NEventStore.dll",
-		"$src_directory/NEventStore/bin/$target_config/System.Reactive.Interfaces.dll",
-		"$src_directory/NEventStore/bin/$target_config/System.Reactive.Core.dll",
-		"$src_directory/NEventStore/bin/$target_config/System.Reactive.Linq.dll",
-		"$src_directory/NEventStore/bin/$target_config/Newtonsoft.Json.dll"
-	)
+	# Merge-Assemblies -outputFile "$publish_directory/bin/NEventStore.dll" -files @(
+	# 	"$src_directory/NEventStore/bin/$target_config/NEventStore.dll",
+	# 	"$src_directory/NEventStore/bin/$target_config/System.Reactive.Interfaces.dll",
+	# 	"$src_directory/NEventStore/bin/$target_config/System.Reactive.Core.dll",
+	# 	"$src_directory/NEventStore/bin/$target_config/System.Reactive.Linq.dll",
+	# 	"$src_directory/NEventStore/bin/$target_config/Newtonsoft.Json.dll"
+	# )
 }
 
 task Clean {

@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("NEventStore.Droid.Resource", IsApplication=false)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("NEventStore.Resource", IsApplication=false)]
 
-namespace NEventStore.Droid
+namespace NEventStore
 {
 	
 	
