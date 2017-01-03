@@ -62,6 +62,7 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		NEventStore.Shared\NEventStore.Shared.projitems*{0214fc01-40c3-41e6-bfcf-36da9fbd51ad}*SharedItemsImports = 4
 		NEventStore.Shared\NEventStore.Shared.projitems*{03946843-f343-419c-88ef-3e446d08dfa6}*SharedItemsImports = 4
+		NEventStore.Shared\NEventStore.Shared.projitems*{184306a0-cd59-46a7-afe9-301335949328}*SharedItemsImports = 4
 		NEventStore.Shared\NEventStore.Shared.projitems*{51cefd3d-bb3b-426c-8c51-04fde5d6bb7f}*SharedItemsImports = 4
 		NEventStore.Shared\NEventStore.Shared.projitems*{b0c675bb-763d-4b50-9979-01cbcfb790f6}*SharedItemsImports = 4
 		NEventStore.Shared\NEventStore.Shared.projitems*{df1861cb-af1c-47e8-8306-ee36e38a6df4}*SharedItemsImports = 13

@@ -1,6 +1,9 @@
 namespace NEventStore
 {
+#if !PCL
     using System.Transactions;
+#endif
+    using System;
     using NEventStore.Dispatcher;
     using NEventStore.Logging;
     using NEventStore.Persistence;
@@ -12,6 +15,7 @@ namespace NEventStore
         public AsynchronousDispatchSchedulerWireup(Wireup wireup, IDispatchCommits dispatcher, DispatcherSchedulerStartup startup)
             : base(wireup)
         {
+#if !PCL
             var option = Container.Resolve<TransactionScopeOption>();
             if (option != TransactionScopeOption.Suppress)
             {
@@ -32,6 +36,9 @@ namespace NEventStore
                 }
                 return dispatchScheduler;
             });
+#else
+            throw new NotSupportedException("The PCL bait assembly was not switched with platform-specific assemply! Make sure you have referenced NEventStore in your platform project as well");
+#endif
         }
 
         public AsynchronousDispatchSchedulerWireup Startup(DispatcherSchedulerStartup startup)

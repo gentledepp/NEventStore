@@ -6,7 +6,9 @@ namespace NEventStore
     /// <summary>
     ///     Represents an attempt to retrieve a nonexistent event stream.
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     public class StreamNotFoundException : Exception
     {
         /// <summary>
@@ -32,7 +34,7 @@ namespace NEventStore
             : base(message, innerException)
         {}
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         /// <summary>
         ///     Initializes a new instance of the StreamNotFoundException class.
         /// </summary>

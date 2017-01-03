@@ -2,10 +2,24 @@ namespace NEventStore.Logging
 {
     using System;
 
+#if PCL
+    internal enum ConsoleColor
+    {
+        DarkGreen,
+        Green,
+        White,
+        Yellow,
+        DarkRed,
+        Red
+    }
+#endif
+
     public class ConsoleWindowLogger : ILog
     {
         private static readonly object Sync = new object();
+#if !PCL
         private readonly ConsoleColor _originalColor = Console.ForegroundColor;
+#endif
         private readonly Type _typeToLog;
 
         public ConsoleWindowLogger(Type typeToLog)
@@ -47,9 +61,13 @@ namespace NEventStore.Logging
         {
             lock (Sync)
             {
+#if PCL
+                System.Diagnostics.Debug.WriteLine(message.FormatMessage(_typeToLog, values));
+#else
                 Console.ForegroundColor = color;
                 Console.WriteLine(message.FormatMessage(_typeToLog, values));
                 Console.ForegroundColor = _originalColor;
+#endif
             }
         }
     }

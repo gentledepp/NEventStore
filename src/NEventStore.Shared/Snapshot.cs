@@ -7,7 +7,9 @@ namespace NEventStore
     ///     Represents a materialized view of a stream at specific revision.
     /// </summary>
     [DataContract]
+#if !PCL
     [Serializable]
+#endif
     public class Snapshot : ISnapshot
     {
         /// <summary>

@@ -1,8 +1,11 @@
 namespace NEventStore
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+#if !PCL
     using System.Transactions;
+#endif
     using Newtonsoft.Json;
     using NEventStore.Conversion;
     using NEventStore.Dispatcher;
@@ -33,6 +36,7 @@ namespace NEventStore
 
         public static Wireup Init()
         {
+#if !PCL
             var container = new NanoContainer();
 
             container.Register(TransactionScopeOption.Suppress);
@@ -42,6 +46,9 @@ namespace NEventStore
             container.Register(BuildEventStore);
 
             return new Wireup(container);
+#else
+            throw new NotSupportedException("The PCL bait assembly was not switched with platform-specific assemply! Make sure you have referenced NEventStore in your platform project as well");
+#endif
         }
 
         public virtual Wireup With<T>(T instance) where T : class
@@ -74,6 +81,7 @@ namespace NEventStore
 
         private static IStoreEvents BuildEventStore(NanoContainer context)
         {
+#if !PCL
             var scopeOption = context.Resolve<TransactionScopeOption>();
             OptimisticPipelineHook concurrency = scopeOption == TransactionScopeOption.Suppress ? new OptimisticPipelineHook() : null;
             var dispatchScheduler = context.Resolve<IScheduleDispatches>();
@@ -87,6 +95,10 @@ namespace NEventStore
                 .ToArray();
 
             return new OptimisticEventStore(context.Resolve<IPersistStreams>(), hooks, dispatchScheduler.Start);
+            
+#else
+            throw new NotSupportedException("The PCL bait assembly was not switched with platform-specific assemply! Make sure you have referenced NEventStore in your platform project as well");
+#endif
         }
     }
 }

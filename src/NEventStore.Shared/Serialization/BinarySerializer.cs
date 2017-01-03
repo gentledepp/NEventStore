@@ -1,6 +1,6 @@
 namespace NEventStore.Serialization
 {
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using System.IO;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;

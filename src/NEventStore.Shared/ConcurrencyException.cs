@@ -6,7 +6,9 @@ namespace NEventStore
     /// <summary>
     ///     Represents an optimistic concurrency conflict between multiple writers.
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     public class ConcurrencyException : Exception
     {
         /// <summary>
@@ -32,7 +34,7 @@ namespace NEventStore
             : base(message, innerException)
         {}
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         /// <summary>
         ///     Initializes a new instance of the ConcurrencyException class.
         /// </summary>

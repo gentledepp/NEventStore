@@ -3,7 +3,9 @@ namespace NEventStore.Serialization
     using System;
     using System.Collections;
     using System.IO;
+#if !PCL
     using System.Security.Cryptography;
+#endif
     using NEventStore.Logging;
 
     public class RijndaelSerializer : ISerialize

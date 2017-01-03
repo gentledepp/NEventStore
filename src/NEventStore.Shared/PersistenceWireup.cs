@@ -1,7 +1,9 @@
 namespace NEventStore
 {
     using System;
+#if !PCL
     using System.Transactions;
+#endif
     using NEventStore.Diagnostics;
     using NEventStore.Logging;
     using NEventStore.Persistence;
@@ -17,7 +19,11 @@ namespace NEventStore
         public PersistenceWireup(Wireup inner)
             : base(inner)
         {
+#if !PCL
             Container.Register(TransactionScopeOption.Suppress);
+#else
+            throw new NotSupportedException("The PCL bait assembly was not switched with platform-specific assemply! Make sure you have referenced NEventStore in your platform project as well");
+#endif
         }
 
         public virtual PersistenceWireup WithPersistence(IPersistStreams instance)
@@ -54,9 +60,13 @@ namespace NEventStore
 
         public virtual PersistenceWireup EnlistInAmbientTransaction()
         {
+#if !PCL
             Logger.Debug(Messages.ConfiguringEngineEnlistment);
             Container.Register(TransactionScopeOption.Required);
             return this;
+#else
+            throw new NotSupportedException("The PCL bait assembly was not switched with platform-specific assemply! Make sure you have referenced NEventStore in your platform project as well");
+#endif
         }
 
         public override IStoreEvents Build()

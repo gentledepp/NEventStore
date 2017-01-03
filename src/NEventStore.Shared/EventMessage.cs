@@ -7,7 +7,9 @@
     /// <summary>
     ///     Represents a single element in a stream of events.
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     [DataContract]
     public class EventMessage
     {

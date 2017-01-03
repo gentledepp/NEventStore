@@ -6,7 +6,9 @@ namespace NEventStore.Persistence
     /// <summary>
     ///     Represents a general failure of the storage engine or persistence infrastructure.
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     public class StorageException : Exception
     {
         /// <summary>
@@ -32,7 +34,7 @@ namespace NEventStore.Persistence
             : base(message, innerException)
         {}
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         /// <summary>
         ///     Initializes a new instance of the StorageException class.
         /// </summary>

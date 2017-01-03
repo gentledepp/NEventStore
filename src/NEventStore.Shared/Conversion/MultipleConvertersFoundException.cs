@@ -6,7 +6,9 @@
     /// <summary>
     ///     Represents the failure that occurs when there are two or more event converters created for the same source type.
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     public class MultipleConvertersFoundException : Exception
     {
         /// <summary>
@@ -32,7 +34,7 @@
             : base(message, innerException)
         {}
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         /// <summary>
         ///     Initializes a new instance of the MultipleConvertersFoundException class.
         /// </summary>

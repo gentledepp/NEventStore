@@ -21,7 +21,7 @@ namespace NEventStore.Logging
 
         private static string GetThreadName()
         {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || PCL
             return string.Empty;
 #else
             var thread = Thread.CurrentThread;

@@ -6,7 +6,9 @@ namespace NEventStore.Persistence
     /// <summary>
     ///     Indicates that the underlying persistence medium is unavailable or offline.
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     public class StorageUnavailableException : StorageException
     {
         /// <summary>
@@ -32,7 +34,7 @@ namespace NEventStore.Persistence
             : base(message, innerException)
         {}
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         /// <summary>
         ///     Initializes a new instance of the StorageUnavailableException class.
         /// </summary>
