@@ -3,11 +3,13 @@ namespace NEventStore
     using System.Collections.Generic;
     using System.Linq;
     using System.Transactions;
+    using Newtonsoft.Json;
     using NEventStore.Conversion;
     using NEventStore.Dispatcher;
     using NEventStore.Persistence;
     using NEventStore.Persistence.InMemory;
     using NEventStore.Serialization;
+    using JsonSerializer = NEventStore.Serialization.JsonSerializer;
 
     public class Wireup
     {

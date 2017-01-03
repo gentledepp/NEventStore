@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>df1861cb-af1c-47e8-8306-ee36e38a6df4</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>NEventStore.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AccessSnapshotsExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AsynchronousDispatchSchedulerWireup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bucket.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\ClientBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\IObserveCommits.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Messages.Designer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\PollingClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\TaskHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommitAttempt.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommitAttemptExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommitEqualityComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommitEventsExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConcurrencyException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Conversion\EventUpconverterPipelineHook.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Conversion\IUpconvertEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Conversion\MultipleConvertersFoundException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Diagnostics\PerformanceCounterPersistenceEngine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Diagnostics\PerformanceCounters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DispatcherSchedulerStartup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DispatcherWireupExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dispatcher\AsynchronousDispatchScheduler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dispatcher\DelegateMessageDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dispatcher\IDispatchCommits.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dispatcher\IScheduleDispatches.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dispatcher\NoopDispatcherScheduler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dispatcher\NullDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dispatcher\SynchronousDispatchScheduler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DispatchSchedulerPipelineHook.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DuplicateCommitException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventUpconverterWireup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventUpconverterWireupExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Guard.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IAccessSnapshots.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICheckpoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICommit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICommitEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IEventStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImmutableCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IPipelineHook.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISnapshot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IStoreEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoggingWireupExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging\ConsoleWindowLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging\ExtensionMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging\ILog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging\LogFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging\OutputWindowLogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LongCheckpoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messages.Designer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NanoContainer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NoopDispatchSchedulerWireup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OptimisticEventStore.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OptimisticEventStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OptimisticPipelineHook.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PersistenceWireup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PersistenceWireupExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\Commit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\InMemory\InMemoryPersistenceEngine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\InMemory\InMemoryPersistenceFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\IPersistenceFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\IPersistStreams.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\IStreamHead.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\PersistStreamsExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\PipelineHooksAwarePersistanceDecorator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\StorageException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\StorageUnavailableException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\StreamHead.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Persistence\StreamHeadEqualityComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PipelineHookBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PipelineHookExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources.Designer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SerializationWireup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SerializationWireupExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BinarySerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BsonSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ByteStreamDocumentSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DocumentObjectSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\GzipSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\IDocumentSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\IndisposableStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerialize.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\JsonSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Messages.Designer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ProtobufSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\RijndaelSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\SerializationExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Snapshot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StoreEventsExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StreamNotFoundException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SynchronousDispatchSchedulerWireup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SystemTime.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Wireup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Client\Messages.resx" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Messages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Serialization\Messages.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)NEventStore.csproj" />
+    <None Include="$(MSBuildThisFileDirectory)packages.config" />
+  </ItemGroup>
+</Project>

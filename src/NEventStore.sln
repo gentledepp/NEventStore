@@ -48,7 +48,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.PollingClientEx
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.Serialization.Protobuf.Tests", "NEventStore.Serialization.Protobuf.Tests\NEventStore.Serialization.Protobuf.Tests.csproj", "{64DAE8A1-ACAA-4C5F-9AE3-E9A9B1B1472B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.PCL", "NEventStore.PCL\NEventStore.PCL.csproj", "{184306A0-CD59-46A7-AFE9-301335949328}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NEventStore.Shared", "NEventStore.Shared\NEventStore.Shared.shproj", "{DF1861CB-AF1C-47E8-8306-EE36E38A6DF4}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		NEventStore.Shared\NEventStore.Shared.projitems*{03946843-f343-419c-88ef-3e446d08dfa6}*SharedItemsImports = 4
+		NEventStore.Shared\NEventStore.Shared.projitems*{df1861cb-af1c-47e8-8306-ee36e38a6df4}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -98,6 +106,10 @@ Global
 		{64DAE8A1-ACAA-4C5F-9AE3-E9A9B1B1472B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64DAE8A1-ACAA-4C5F-9AE3-E9A9B1B1472B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64DAE8A1-ACAA-4C5F-9AE3-E9A9B1B1472B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{184306A0-CD59-46A7-AFE9-301335949328}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{184306A0-CD59-46A7-AFE9-301335949328}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{184306A0-CD59-46A7-AFE9-301335949328}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{184306A0-CD59-46A7-AFE9-301335949328}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,5 +126,7 @@ Global
 		{0143B48E-25AF-4CE0-BD49-A52267D359D3} = {CD37080A-F48D-4E5D-B7C6-B9F86BB05A38}
 		{49705881-56D3-447A-92D8-D11CA6085DBD} = {CD37080A-F48D-4E5D-B7C6-B9F86BB05A38}
 		{64DAE8A1-ACAA-4C5F-9AE3-E9A9B1B1472B} = {52F7988F-452D-46C2-A144-D85E0CF371C6}
+		{184306A0-CD59-46A7-AFE9-301335949328} = {D35087BF-941A-49EA-96A8-B10457C4D169}
+		{DF1861CB-AF1C-47E8-8306-EE36E38A6DF4} = {D35087BF-941A-49EA-96A8-B10457C4D169}
 	EndGlobalSection
 EndGlobal
