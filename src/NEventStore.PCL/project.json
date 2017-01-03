@@ -6,7 +6,7 @@
     "System.Reactive.Linq": "3.1.1"
   },
   "frameworks": {
-  
+    ".NETPortable,Version=v4.5,Profile=Profile259": {}
   },
   "runtimes": {
     "win": {}
