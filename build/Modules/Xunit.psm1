@@ -473,29 +473,42 @@ function Invoke-XUnit
   if (($SummaryPath -ne $null) -and ($OutputFormat -ne 'nunit'))
     { throw "SummaryPath may only be specified with nunit OutputFormat" }
 
-  $projectPath = New-XUnitProjectFile -Path $Path `
-    -TestSpec $TestSpec -OutputFormat $OutputFormat
+  
+  # $projectPath = New-XUnitProjectFile -Path $Path `
+  #   -TestSpec $TestSpec -OutputFormat $OutputFormat
 
-  $xargs = @($projectPath)
-  $IncludeTraits.GetEnumerator() |
-    % { $xargs += @("/trait","`"$($_.Key)=$($_.Value)`"")}
-  $ExcludeTraits.GetEnumerator() |
-    % { $xargs += @("/-trait", "`"$($_.Key)=$($_.Value)`"")}
+  # $xargs = @($projectPath)
+  # $IncludeTraits.GetEnumerator() |
+  #   % { $xargs += @("/trait","`"$($_.Key)=$($_.Value)`"")}
+  # $ExcludeTraits.GetEnumerator() |
+  #   % { $xargs += @("/-trait", "`"$($_.Key)=$($_.Value)`"")}
 
-  Write-Host "Invoking XUnit against $projectPath`n"
+  # Write-Host "Invoking XUnit against $projectPath`n"
+
+  $testAsms = @()
+  $uniqueFiles = @{}
+  $Path | Get-ChildItem -Recurse -Include $TestSpec |
+    ? { (-not $uniqueFiles.Contains($_.Name)) -and `
+        ($uniqueFiles[$_.Name] -ne $_.Length) } |
+    % { $testAsms += $_; $uniqueFiles[$_.Name] = $_.Length }
+
+  if ($testAsms.Count -eq 0)
+    { throw "No test assemblies matching $TestSpec in $Path!" +
+    "Do you have no tests?? Run a build first!" }
+  $xargs = $testAsms
   &"$XUnitPath" $xargs
 
-  if ($OutputFormat -eq 'nunit')
-  {
-    $xml = [xml](Get-Content $projectPath)
-    $destination = if (-not [string]::IsNullOrEmpty($SummaryPath)) { $SummaryPath }
-      else { Join-Path ($Path | Select -First 1) "$OutputFormat.TestResult.xml"}
-    $params = @{
-      Path = $xml.xunit.assemblies.assembly | % { $_.output.filename };
-      Destination = $destination
-    }
-    New-MergedNUnitXml @params
-  }
+  # if ($OutputFormat -eq 'nunit')
+  # {
+  #   $xml = [xml](Get-Content $projectPath)
+  #   $destination = if (-not [string]::IsNullOrEmpty($SummaryPath)) { $SummaryPath }
+  #     else { Join-Path ($Path | Select -First 1) "$OutputFormat.TestResult.xml"}
+  #   $params = @{
+  #     Path = $xml.xunit.assemblies.assembly | % { $_.output.filename };
+  #     Destination = $destination
+  #   }
+  #   New-MergedNUnitXml @params
+  # }
 }
 
 Export-ModuleMember -Function Set-XUnitPath, New-XUnitProjectFile, Invoke-XUnit,

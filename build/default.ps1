@@ -38,8 +38,6 @@ properties {
 
 	$up = [System.Environment]::ExpandEnvironmentVariables("%UserProfile%")
 	$nuget_packages_dir = "$up\.nuget\packages"
-
-
 	$xunit_path = getTestRunner -packagePath $nuget_packages_dir#"$base_directory\bin\xunit.runners.1.9.1\tools\xunit.console.clr4.exe"
 }
 
@@ -66,17 +64,17 @@ task Test -depends RunUnitTests, RunSerializationTests
 task RunUnitTests {
 	"Unit Tests"
 	EnsureDirectory $output_directory
-	#Invoke-XUnit -Path $src_directory -TestSpec '*NEventStore.Tests.dll' `
-    #-SummaryPath $output_directory\unit_tests.xml `
-    #-XUnitPath $xunit_path
+	Invoke-XUnit -Path $src_directory -TestSpec '*NEventStore.Tests.dll' `
+    -SummaryPath $output_directory\unit_tests.xml `
+    -XUnitPath $xunit_path
 }
 
 task RunSerializationTests {
 	"Serialization Tests"
 	EnsureDirectory $output_directory
-	#Invoke-XUnit -Path $src_directory -TestSpec '*Serialization.*.Tests.dll' `
-    #-SummaryPath $output_directory\serialization_tests.xml `
-    #-XUnitPath $xunit_path
+	Invoke-XUnit -Path $src_directory -TestSpec '*Serialization.*.Tests.dll' `
+    -SummaryPath $output_directory\serialization_tests.xml `
+    -XUnitPath $xunit_path
 }
 
 task Package -depends Build, PackageNEventStore {
