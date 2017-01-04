@@ -46,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BDD\SpecificationBase.cs" />
-    <Compile Include="BDD\SpecificationBaseRunner.cs" />
     <Compile Include="Catch.cs" />
     <Compile Include="ConfigurationExtensions.cs" />
     <Compile Include="ExtensionMethods.cs" />

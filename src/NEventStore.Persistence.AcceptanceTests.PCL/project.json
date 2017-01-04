@@ -1,0 +1,10 @@
+{
+  "supports": {},
+  "dependencies": {
+    "FluentAssertions": "4.18.0",
+    "xunit": "2.1.0"
+  },
+  "frameworks": {
+    ".NETPortable,Version=v4.5,Profile=Profile259": {}
+  }
+}

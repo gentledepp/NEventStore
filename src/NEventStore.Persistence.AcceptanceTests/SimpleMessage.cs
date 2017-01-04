@@ -5,7 +5,9 @@ namespace NEventStore.Persistence.AcceptanceTests
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
 
+#if !PCL
     [Serializable]
+#endif
     [DataContract(Namespace = "AcceptanceTests", Name = "SimpleMessage")]
     public class SimpleMessage
     {

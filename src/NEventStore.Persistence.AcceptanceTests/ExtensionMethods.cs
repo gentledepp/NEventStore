@@ -141,8 +141,9 @@ namespace NEventStore.Persistence.AcceptanceTests
 
             return new CommitAttempt(streamId, streamRevision, commitId, commitSequence, SystemTime.UtcNow, headers, events.ToList());
         }
-
+#if !PCL
         [Serializable]
+#endif
         public class SomeDomainEvent
         {
             public string SomeProperty { get; set; }

@@ -57,6 +57,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.Droid", "NEvent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.UWP", "NEventStore.UWP\NEventStore.UWP.csproj", "{51CEFD3D-BB3B-426C-8C51-04FDE5D6BB7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.Persistence.AcceptanceTests.PCL", "NEventStore.Persistence.AcceptanceTests.PCL\NEventStore.Persistence.AcceptanceTests.PCL.csproj", "{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		NEventStore.Shared\NEventStore.Shared.projitems*{0214fc01-40c3-41e6-bfcf-36da9fbd51ad}*SharedItemsImports = 4
@@ -317,6 +319,22 @@ Global
 		{51CEFD3D-BB3B-426C-8C51-04FDE5D6BB7F}.Release|x64.Build.0 = Release|x64
 		{51CEFD3D-BB3B-426C-8C51-04FDE5D6BB7F}.Release|x86.ActiveCfg = Release|x86
 		{51CEFD3D-BB3B-426C-8C51-04FDE5D6BB7F}.Release|x86.Build.0 = Release|x86
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|ARM.Build.0 = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|x64.Build.0 = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Debug|x86.Build.0 = Debug|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|ARM.ActiveCfg = Release|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|ARM.Build.0 = Release|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|x64.ActiveCfg = Release|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|x64.Build.0 = Release|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|x86.ActiveCfg = Release|Any CPU
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -338,5 +356,6 @@ Global
 		{0214FC01-40C3-41E6-BFCF-36DA9FBD51AD} = {D35087BF-941A-49EA-96A8-B10457C4D169}
 		{B0C675BB-763D-4B50-9979-01CBCFB790F6} = {D35087BF-941A-49EA-96A8-B10457C4D169}
 		{51CEFD3D-BB3B-426C-8C51-04FDE5D6BB7F} = {D35087BF-941A-49EA-96A8-B10457C4D169}
+		{5613B794-2C43-4BB6-BCCB-ECEB62AED7E1} = {D3C17830-A461-4BA5-A672-461B19B33936}
 	EndGlobalSection
 EndGlobal
