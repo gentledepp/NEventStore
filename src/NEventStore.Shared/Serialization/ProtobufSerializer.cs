@@ -1,12 +1,15 @@
 namespace NEventStore.Serialization
 {
-#if FRAMEWORK
+    using System;
+    using System.IO;
+
+#if !PCL
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.Serialization;
-    using System.Runtime.Serialization.Formatters.Binary;
     using NEventStore.Logging;
     using ProtoBuf;
     using ProtoBuf.Meta;
@@ -46,7 +49,11 @@ namespace NEventStore.Serialization
             var eventTypes = new List<Type>();
             if (knownEventTypes == null || knownEventTypes.Length == 0)
             {
-                eventTypes = MessagesProvider.GetKnownEventTypes().ToList();
+#if FRAMEWORK
+                eventTypes = MessageTypeProvider.GetKnownEventTypes().ToList();
+#else
+                throw new ArgumentOutOfRangeException($"You must provide {nameof(knownEventTypes)}!");
+#endif
             }
             else
             {
@@ -65,12 +72,10 @@ namespace NEventStore.Serialization
 
             var t2c = eventTypes.ToDictionary
             (t => t,
-                t =>
-                {
-                    var formatter = RuntimeTypeModel.Default.CreateFormatter(t);
-                    return new Formatter(t.GetContractName(_type2ContractName), formatter.Deserialize,
-                        (o, stream) => formatter.Serialize(stream, o));
-                });
+                t =>  new Formatter(t.GetContractName(_type2ContractName),
+                        (stream) => ProtoBuf.Serializer.Deserialize(t, stream),
+                        (o, stream) => ProtoBuf.Serializer.Serialize(stream, o))
+                );
             foreach (var t in t2c)
             {
                 _type2Contract.Add(t.Key, t.Value);
@@ -109,9 +114,9 @@ namespace NEventStore.Serialization
 
         private void AddFormatter(Type type, string contractName)
         {
-            var formatter = RuntimeTypeModel.Default.CreateFormatter(type);
-            var f = new Formatter(contractName, formatter.Deserialize,
-                (o, stream) => formatter.Serialize(stream, o));
+            var f = new Formatter(type.GetContractName(_type2ContractName),
+                        (stream) => ProtoBuf.Serializer.Deserialize(type, stream),
+                        (o, stream) => ProtoBuf.Serializer.Serialize(stream, o));
 
             _type2Contract.Add(type, f);
             _type2ContractName.Add(type, contractName);
@@ -127,9 +132,9 @@ namespace NEventStore.Serialization
             {
                 //var s = $"Can't find a serializer for unknown object type '{t.FullName}'.Have you passed all known types to the constructor?";
                 //throw new InvalidOperationException(s);
-                var f = RuntimeTypeModel.Default.CreateFormatter(t);
-                formatter = new Formatter(String.Empty, f.Deserialize,
-                    (o, stream) => f.Serialize(stream, o));
+                formatter = new Formatter(t.GetContractName(_type2ContractName),
+                        (stream) => ProtoBuf.Serializer.Deserialize(t, stream),
+                        (o, stream) => ProtoBuf.Serializer.Serialize(stream, o));
             }
 
             formatter.SerializeDelegate(graph, output);
@@ -148,9 +153,9 @@ namespace NEventStore.Serialization
             Type t = typeof(T);
             if (!_type2Contract.TryGetValue(t, out value))
             {
-                var f = RuntimeTypeModel.Default.CreateFormatter(t);
-                value = new Formatter(String.Empty, f.Deserialize,
-                    (o, stream) => f.Serialize(stream, o));
+                var f = new Formatter(t.GetContractName(_type2ContractName),
+                        (stream) => ProtoBuf.Serializer.Deserialize(t, stream),
+                        (o, stream) => ProtoBuf.Serializer.Serialize(stream, o));
             }
 
             return (T)value.DeserializerDelegate(input);
@@ -174,11 +179,11 @@ namespace NEventStore.Serialization
         {
             Formatter formatter;
 
-            if (type.IsValueType || type == typeof(string))
+            if (type.GetTypeInfo().IsValueType || type == typeof(string))
             {
-                var f = RuntimeTypeModel.Default.CreateFormatter(type);
-                formatter = new Formatter(String.Empty, f.Deserialize,
-                    (o, stream) => f.Serialize(stream, o));
+                formatter = new Formatter(type.GetContractName(_type2ContractName),
+                        (stream) => ProtoBuf.Serializer.Deserialize(type, stream),
+                        (o, stream) => ProtoBuf.Serializer.Serialize(stream, o));
             }
             else if (!_type2Contract.TryGetValue(type, out formatter))
             {
@@ -247,21 +252,6 @@ namespace NEventStore.Serialization
         }
     }
 
-    public static class MessagesProvider
-    {
-        public static Type[] GetKnownEventTypes()
-        {
-            var types = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(s => s.GetExportedTypes()
-                    .Where(t => (t.GetCustomAttributes(typeof(DataContractAttribute), true).Any()) 
-                         && t.IsAbstract == false)
-                         )
-                .Union(new[] { typeof(MessageContract) })
-                .ToArray();
-            return types;
-        }
-    }
-
     [DataContract(Namespace="nes.proto", Name="mc")]
     public sealed class MessageContract
     {
@@ -316,13 +306,13 @@ namespace NEventStore.Serialization
                 self == typeof(Snapshot))
                 return null;
 
-            if (type2Contract != null && (self == typeof(string) || self.IsValueType))
+            if (type2Contract != null && (self == typeof(string) || self.GetTypeInfo().IsValueType))
             {
                 n = type2Contract[self];
             }
             else
             {
-                var attr = (DataContractAttribute)self.GetCustomAttributes(typeof(DataContractAttribute), false).FirstOrDefault();
+                var attr = (DataContractAttribute)self.GetTypeInfo().GetCustomAttributes(typeof(DataContractAttribute), false).FirstOrDefault();
 
                 if (attr == null)
                     throw new InvalidOperationException($"The type '{self.FullName}' cannot be serialized as it does not have a '[DataContract]' attribute");
@@ -470,6 +460,41 @@ namespace NEventStore.Serialization
             public string Key { get; set; }
             [ProtoMember(2)]
             public byte[] Value { get; set; }
+        }
+    }
+
+#else
+    public class ProtobufSerializer : ISerialize
+    {
+        public ProtobufSerializer(params Type[] knownEventTypes)
+        {
+            throw new NotSupportedException("you called the constructor of protobuf in PCL which is not supported. Did you forget to reference a platform-specific version of NEventStore?");       
+        }
+
+        public void Serialize<T>(Stream output, T graph)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T Deserialize<T>(Stream input)
+        {
+            throw new NotImplementedException();
+        }
+    }
+#endif
+#if FRAMEWORK
+    public static class MessageTypeProvider
+    {
+        public static Type[] GetKnownEventTypes()
+        {
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetExportedTypes()
+                    .Where(t => (t.GetCustomAttributes(typeof(DataContractAttribute), true).Any())
+                         && t.IsAbstract == false)
+                         )
+                .Union(new[] { typeof(MessageContract) })
+                .ToArray();
+            return types;
         }
     }
 #endif
