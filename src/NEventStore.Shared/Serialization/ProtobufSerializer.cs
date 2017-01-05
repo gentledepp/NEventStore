@@ -114,7 +114,7 @@ namespace NEventStore.Serialization
 
         private void AddFormatter(Type type, string contractName)
         {
-            var f = new Formatter(type.GetContractName(_type2ContractName),
+            var f = new Formatter(contractName,
                         (stream) => ProtoBuf.Serializer.Deserialize(type, stream),
                         (o, stream) => ProtoBuf.Serializer.Serialize(stream, o));
 
@@ -132,7 +132,7 @@ namespace NEventStore.Serialization
             {
                 //var s = $"Can't find a serializer for unknown object type '{t.FullName}'.Have you passed all known types to the constructor?";
                 //throw new InvalidOperationException(s);
-                formatter = new Formatter(t.GetContractName(_type2ContractName),
+                formatter = new Formatter(string.Empty,
                         (stream) => ProtoBuf.Serializer.Deserialize(t, stream),
                         (o, stream) => ProtoBuf.Serializer.Serialize(stream, o));
             }
@@ -149,16 +149,16 @@ namespace NEventStore.Serialization
         {
             Logger.Verbose(Messages.DeserializingStream, typeof(T));
 
-            Formatter value;
+            Formatter f;
             Type t = typeof(T);
-            if (!_type2Contract.TryGetValue(t, out value))
+            if (!_type2Contract.TryGetValue(t, out f))
             {
-                var f = new Formatter(t.GetContractName(_type2ContractName),
+                f = new Formatter(string.Empty,
                         (stream) => ProtoBuf.Serializer.Deserialize(t, stream),
                         (o, stream) => ProtoBuf.Serializer.Serialize(stream, o));
             }
 
-            return (T)value.DeserializerDelegate(input);
+            return (T)f.DeserializerDelegate(input);
         }
         
         public virtual object Deserialize(Stream input, Type t)
