@@ -60,8 +60,8 @@ namespace NEventStore.Serialization
                 eventTypes.AddRange(knownEventTypes);
                 eventTypes.Add(typeof(MessageContract));
             }
-            
-            var simpleTypes = new Type[] { typeof(string), typeof(int), typeof(long), typeof(double), typeof(Guid), typeof(short)};
+
+            var simpleTypes = new Type[] { typeof(string), typeof(int), typeof(long), typeof(double), typeof(Guid), typeof(short) };
 
             foreach (var type in simpleTypes.Concat(eventTypes))
             {
@@ -73,7 +73,7 @@ namespace NEventStore.Serialization
 
             var t2c = eventTypes.ToDictionary
             (t => t,
-                t =>  new Formatter(t.GetContractName(_type2ContractName),
+                t => new Formatter(t.GetContractName(_type2ContractName),
                         (stream) => ProtoBuf.Serializer.Deserialize(t, stream),
                         (o, stream) => ProtoBuf.Serializer.Serialize(stream, o))
                 );
@@ -126,6 +126,22 @@ namespace NEventStore.Serialization
 
         public virtual void Serialize<T>(Stream output, T graph)
         {
+            // ugly but necessary for commit headers
+            // as you cannot register a surrogate for a collection in protobuf-net
+            var dict = graph as Dictionary<string, object>;
+            if (dict != null)
+            {
+                var converted = DictionaryHelpers.Serialize(dict);
+                ProtoBuf.Serializer.Serialize(output, converted);
+                return;
+            }
+            if (typeof(T) == typeof(object))
+            {
+                var data = SerializeEvent(graph);
+                output.Write(data, 0, data.Length);
+                return;
+            }
+
             Logger.Verbose(Messages.SerializingGraph, typeof(T));
             Formatter formatter;
             Type t = typeof(T);
@@ -150,6 +166,19 @@ namespace NEventStore.Serialization
         {
             Logger.Verbose(Messages.DeserializingStream, typeof(T));
 
+            // ugly but necessary for commit headers
+            // as you cannot register a surrogate for a collection in protobuf-net
+            if (typeof(T) == typeof(Dictionary<string, object>))
+            {
+                var list = ProtoBuf.Serializer.Deserialize(typeof(List<KeyValuePairSurrogate>), input);
+                return (T)(object)DictionaryHelpers.Deserialize((List<KeyValuePairSurrogate>)list);
+            }
+            if (typeof(T) == typeof(object))
+            {
+                var data = DeserializeEvent(input);
+                return (T)data;
+            }
+
             Formatter f;
             Type t = typeof(T);
             if (!_type2Contract.TryGetValue(t, out f))
@@ -161,7 +190,7 @@ namespace NEventStore.Serialization
 
             return (T)f.DeserializerDelegate(input);
         }
-        
+
         public virtual object Deserialize(Stream input, Type t)
         {
             Logger.Verbose(Messages.DeserializingStream, t);
@@ -197,7 +226,7 @@ namespace NEventStore.Serialization
 
         public byte[] SerializeEvent(object e)
         {
-            if(e == null)
+            if (e == null)
                 return new byte[0];
 
             byte[] content;
@@ -235,14 +264,14 @@ namespace NEventStore.Serialization
                 ms.Seek(MessageHeaderContract.FixedSize, SeekOrigin.Begin);
 
                 var headerBuffer = new byte[header.HeaderBytes];
-                ms.Read(headerBuffer, 0, (int) header.HeaderBytes);
+                ms.Read(headerBuffer, 0, (int)header.HeaderBytes);
                 MessageContract contract;
 
                 using (var headerStream = new MemoryStream(headerBuffer))
                     contract = Deserialize<MessageContract>(headerStream);
 
                 var contentBuffer = new byte[contract.ContentSize];
-                ms.Read(contentBuffer, 0, (int) contract.ContentSize);
+                ms.Read(contentBuffer, 0, (int)contract.ContentSize);
                 var contentType = GetContentType(contract.ContractName);
 
                 using (var contentStream = new MemoryStream(contentBuffer))
@@ -251,18 +280,43 @@ namespace NEventStore.Serialization
                 }
             }
         }
+
+        public object DeserializeEvent(Stream ms)
+        {
+            var header = MessageHeaderContract.ReadHeader(ms);
+            ms.Seek(MessageHeaderContract.FixedSize, SeekOrigin.Begin);
+
+            var headerBuffer = new byte[header.HeaderBytes];
+            ms.Read(headerBuffer, 0, (int)header.HeaderBytes);
+            MessageContract contract;
+
+            using (var headerStream = new MemoryStream(headerBuffer))
+                contract = Deserialize<MessageContract>(headerStream);
+
+            var contentBuffer = new byte[contract.ContentSize];
+            ms.Read(contentBuffer, 0, (int)contract.ContentSize);
+            var contentType = GetContentType(contract.ContractName);
+
+            using (var contentStream = new MemoryStream(contentBuffer))
+            {
+                return Deserialize(contentStream, contentType);
+            }
+        }
     }
 
-    [DataContract(Namespace="nes.proto", Name="mc")]
+    [DataContract(Namespace = "nes.proto", Name = "mc")]
     public sealed class MessageContract
     {
-        [DataMember(Order = 1)] public readonly string ContractName;
-        [DataMember(Order = 2)] public readonly long ContentSize;
-        [DataMember(Order = 3)] public readonly long ContentPosition;
+        [DataMember(Order = 1)]
+        public readonly string ContractName;
+        [DataMember(Order = 2)]
+        public readonly long ContentSize;
+        [DataMember(Order = 3)]
+        public readonly long ContentPosition;
 
         MessageContract()
         {
-            
+
         }
 
         public MessageContract(string contractName, long contentSize, long contentPosition)
@@ -286,6 +340,17 @@ namespace NEventStore.Serialization
         public static MessageHeaderContract ReadHeader(byte[] buffer)
         {
             var headerBytes = BitConverter.ToInt64(buffer, 0);
+            return new MessageHeaderContract(headerBytes);
+        }
+
+        public static MessageHeaderContract ReadHeader(Stream stream)
+        {
+            var list = new List<byte>();
+            for (int i = 0; i < FixedSize; i++)
+            {
+                list.Add((byte)stream.ReadByte());
+            }
+            var headerBytes = BitConverter.ToInt64(list.ToArray(), 0);
             return new MessageHeaderContract(headerBytes);
         }
 
@@ -395,12 +460,12 @@ namespace NEventStore.Serialization
         /// </summary>
         [DataMember(Order = 2)]
         public byte[] Body { get; set; }
-        
+
         public static implicit operator EventMessage(EventMessageSurrogate suggorage)
         {
             return suggorage == null ? null : new EventMessage
             {
-                Headers = Deserialize(suggorage.Headers),
+                Headers = DictionaryHelpers.Deserialize(suggorage.Headers),
                 Body = ProtobufSerializer.Instance.DeserializeEvent(suggorage.Body)
             };
         }
@@ -409,18 +474,41 @@ namespace NEventStore.Serialization
         {
             return source == null ? null : new EventMessageSurrogate
             {
-                Headers = Serialize(source.Headers),
+                Headers = DictionaryHelpers.Serialize(source.Headers),
                 Body = ProtobufSerializer.Instance.SerializeEvent(source.Body)
             };
         }
+    }
 
-        private static List<KeyValuePairSurrogate> Serialize(Dictionary<string, object> o)
+    [ProtoContract]
+    public class KeyValuePairSurrogate
+    {
+        public KeyValuePairSurrogate()
+        {
+
+        }
+
+        public KeyValuePairSurrogate(string key, byte[] value)
+        {
+            Key = key;
+            Value = value;
+        }
+
+        [ProtoMember(1)]
+        public string Key { get; set; }
+        [ProtoMember(2)]
+        public byte[] Value { get; set; }
+    }
+
+    internal static class DictionaryHelpers
+    {
+        internal static List<KeyValuePairSurrogate> Serialize(Dictionary<string, object> o)
         {
             var list = new List<KeyValuePairSurrogate>();
 
             if (o == null)
                 return list;
-            
+
             foreach (var kvp in o)
             {
                 list.Add(new KeyValuePairSurrogate(kvp.Key, ProtobufSerializer.Instance.SerializeEvent(kvp.Value)));
@@ -429,7 +517,7 @@ namespace NEventStore.Serialization
             return list;
         }
 
-        private static Dictionary<string, object> Deserialize(List<KeyValuePairSurrogate> b)
+        internal static Dictionary<string, object> Deserialize(List<KeyValuePairSurrogate> b)
         {
             var dict = new Dictionary<string, object>();
             if (b == null)
@@ -441,26 +529,6 @@ namespace NEventStore.Serialization
             }
 
             return dict;
-        }
-
-        [ProtoContract]
-        public class KeyValuePairSurrogate
-        {
-            public KeyValuePairSurrogate()
-            {
-                
-            }
-
-            public KeyValuePairSurrogate(string key, byte[] value)
-            {
-                Key = key;
-                Value = value;
-            }
-
-            [ProtoMember(1)]
-            public string Key { get; set; }
-            [ProtoMember(2)]
-            public byte[] Value { get; set; }
         }
     }
 

@@ -103,6 +103,46 @@
         {}
     }
 
+
+    public class when_serializing_a_list_of_commit_headers_only : SerializationConcern
+    {
+        private readonly Dictionary<string, object> _headers = new Dictionary<string, object>
+        {
+            {"HeaderKey", "SomeValue"},
+            {"AnotherKey", 42},
+            {"AndAnotherKey", Guid.NewGuid()},
+            {"LastKey", new SimpleMessage()}
+        };
+
+        private Dictionary<string, object> _deserialized;
+        private byte[] _serialized;
+
+        protected override void Context()
+        {
+            _serialized = Serializer.Serialize(_headers);
+        }
+
+        protected override void Because()
+        {
+            _deserialized = Serializer.Deserialize<Dictionary<string, object>>(_serialized);
+        }
+
+        [Fact]
+        public void should_deserialize_the_same_number_of_event_messages_as_it_serialized()
+        {
+            _headers.Count.ShouldEqual(_deserialized.Count);
+        }
+
+        [Fact]
+        public void should_deserialize_the_the_complex_types_within_the_event_messages()
+        {
+            _deserialized.Last().Value.ShouldBeInstanceOf<SimpleMessage>();
+        }
+
+        public when_serializing_a_list_of_commit_headers_only(SerializerFixture data) : base(data)
+        { }
+    }
+
     public class when_serializing_a_list_of_commit_headers : SerializationConcern
     {
         private readonly Dictionary<string, object> _headers = new Dictionary<string, object>
