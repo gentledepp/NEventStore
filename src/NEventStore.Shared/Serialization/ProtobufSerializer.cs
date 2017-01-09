@@ -58,6 +58,7 @@ namespace NEventStore.Serialization
             else
             {
                 eventTypes.AddRange(knownEventTypes);
+                eventTypes.Add(typeof(MessageContract));
             }
             
             var simpleTypes = new Type[] { typeof(string), typeof(int), typeof(long), typeof(double), typeof(Guid), typeof(short)};

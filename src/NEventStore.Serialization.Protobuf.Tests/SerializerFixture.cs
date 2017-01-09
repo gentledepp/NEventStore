@@ -2,6 +2,7 @@
 namespace NEventStore.Serialization.AcceptanceTests
 // ReSharper restore CheckNamespace
 {
+    using System.Linq;
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Serialization;
     using ProtoBuf.Meta;
@@ -10,9 +11,11 @@ namespace NEventStore.Serialization.AcceptanceTests
     {
         public SerializerFixture()
         {
+            var knownTypes = KnownTypesProvider.Provide();
+
             _createSerializer = () =>
-                new ProtobufSerializer();
-            
+                new ProtobufSerializer(knownTypes.ToArray());
+
             RuntimeTypeModel.Default[typeof(SimpleMessage)][5].SupportNull = true;
         }
     }
