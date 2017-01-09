@@ -3,6 +3,7 @@ namespace NEventStore.Persistence.AcceptanceTests
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
 
     public static class ExtensionMethods
     {
@@ -144,8 +145,10 @@ namespace NEventStore.Persistence.AcceptanceTests
 #if !PCL
         [Serializable]
 #endif
+        [DataContract(Namespace = "somedomain", Name="event")]
         public class SomeDomainEvent
         {
+            [DataMember(Order=1)]
             public string SomeProperty { get; set; }
 
             public override string ToString()
